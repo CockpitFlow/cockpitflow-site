@@ -5,174 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CockpitFlow — Flight Simulator Cockpit Companion</title>
 <meta name="description" content="Open-source cockpit companion for flight simulators. Custom cockpit layouts, checklists, hardware integration. X-Plane & MSFS.">
-
+<link rel="stylesheet" href="style.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
-:root {
-  --bg: #0a0e14;
-  --surface: #0f1319;
-  --surface2: #141a22;
-  --border: #1e2736;
-  --text: #b8c4d0;
-  --dim: #4e5c6e;
-  --accent: #4a9eff;
-  --green: #34d058;
-  --red: #ea4a5a;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-/* Nav */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 40px;
-  background: rgba(10, 14, 20, .85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,.04);
-}
-.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.nav-logo { width: 32px; height: 32px; border-radius: 6px; }
-.nav-name { font-family: 'Orbitron'; font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 3px; }
-.nav-links { display: flex; gap: 24px; }
-.nav-links a { color: var(--dim); text-decoration: none; font-size: 13px; font-weight: 500; transition: color .15s; }
-.nav-links a:hover { color: var(--text); }
-.nav-cta {
-  padding: 8px 20px; background: rgba(74,158,255,.1);
-  border: 1px solid rgba(74,158,255,.3); border-radius: 6px;
-  color: var(--accent); font-size: 12px; font-weight: 600;
-  text-decoration: none; letter-spacing: .5px; transition: all .15s;
-}
-.nav-cta:hover { background: rgba(74,158,255,.2); }
-
-/* Hero */
 .hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  padding: 120px 20px 80px;
-  position: relative;
-  overflow: hidden;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 120px 20px 80px; position: relative;
 }
 .hero::before {
-  content: '';
-  position: absolute; inset: 0;
+  content: ''; position: absolute; inset: 0;
   background: radial-gradient(ellipse at 50% 30%, rgba(74,158,255,.06) 0%, transparent 70%);
   pointer-events: none;
 }
-.hero-logo { width: 120px; height: 120px; border-radius: 24px; margin-bottom: 24px; position: relative; z-index: 1; }
 .hero h1 {
   font-family: 'Orbitron'; font-size: 48px; font-weight: 700;
-  color: #fff; letter-spacing: 6px; margin-bottom: 12px; position: relative; z-index: 1;
+  color: #fff; letter-spacing: 8px; margin-bottom: 12px; position: relative;
 }
-.hero p {
-  font-size: 18px; color: var(--dim); max-width: 520px; margin-bottom: 32px; position: relative; z-index: 1;
-}
-.hero-btns { display: flex; gap: 12px; position: relative; z-index: 1; }
-.btn {
-  padding: 12px 28px; border-radius: 8px;
-  font-size: 14px; font-weight: 600; text-decoration: none;
-  transition: all .15s; display: inline-flex; align-items: center; gap: 8px;
-}
-.btn-primary { background: var(--accent); color: #fff; border: none; }
-.btn-primary:hover { background: #5aadff; }
-.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { border-color: var(--dim); }
+.hero p { font-size: 18px; color: var(--dim); max-width: 520px; margin-bottom: 32px; position: relative; }
+.hero-btns { display: flex; gap: 12px; position: relative; }
 
-/* Sections */
-section { padding: 80px 20px; }
-.container { max-width: 1000px; margin: 0 auto; }
-.section-label {
-  font-family: 'Orbitron'; font-size: 10px; font-weight: 500;
-  color: var(--accent); letter-spacing: 3px; margin-bottom: 8px;
-}
-.section-title {
-  font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 16px;
-}
-.section-desc {
-  font-size: 16px; color: var(--dim); max-width: 600px; margin-bottom: 40px;
-}
-
-/* Features grid */
-.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.feature {
-  padding: 24px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 10px;
-  transition: border-color .15s;
-}
-.feature:hover { border-color: rgba(74,158,255,.2); }
-.feature-icon { font-size: 28px; margin-bottom: 12px; }
-.feature h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
-.feature p { font-size: 13px; color: var(--dim); line-height: 1.5; }
-
-/* How it works */
 .steps { display: flex; gap: 24px; margin-top: 40px; }
 .step {
   flex: 1; padding: 24px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 10px;
-  text-align: center;
+  border: 1px solid var(--border); border-radius: 10px; text-align: center;
 }
-.step-num {
-  font-family: 'Orbitron'; font-size: 32px; font-weight: 700;
-  color: rgba(74,158,255,.2); margin-bottom: 12px;
-}
+.step-num { font-family: 'Orbitron'; font-size: 32px; font-weight: 700; color: rgba(74,158,255,.2); margin-bottom: 12px; }
 .step h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; }
 .step p { font-size: 12px; color: var(--dim); }
 
-/* Tools */
 .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
 .tool {
-  padding: 24px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 10px;
-  display: flex; flex-direction: column; gap: 8px;
+  padding: 24px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; display: flex; flex-direction: column; gap: 8px;
 }
 .tool h3 { font-size: 15px; color: #fff; }
 .tool p { font-size: 13px; color: var(--dim); flex: 1; }
-.tool a {
-  color: var(--accent); font-size: 12px; font-weight: 600;
-  text-decoration: none;
-}
+.tool a { color: var(--accent); font-size: 12px; font-weight: 600; text-decoration: none; }
 .tool a:hover { text-decoration: underline; }
 
-/* Community */
-.community-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+.comm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
 .comm-card {
-  padding: 20px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 10px;
-  text-align: center;
+  padding: 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; text-align: center;
 }
 .comm-card h3 { font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
 .comm-card p { font-size: 12px; color: var(--dim); }
 
-/* Footer */
-footer {
-  padding: 40px 20px;
-  border-top: 1px solid var(--border);
-  text-align: center;
-}
-footer p { font-size: 12px; color: var(--dim); }
-footer a { color: var(--accent); text-decoration: none; }
-
-/* Responsive */
 @media (max-width: 768px) {
-  nav { padding: 10px 16px; }
-  .nav-links { display: none; }
   .hero h1 { font-size: 28px; letter-spacing: 3px; }
-  .hero p { font-size: 15px; }
-  .features { grid-template-columns: 1fr; }
   .steps { flex-direction: column; }
   .tools { grid-template-columns: 1fr; }
-  .community-grid { grid-template-columns: 1fr; }
+  .comm-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -195,8 +78,8 @@ footer a { color: var(--accent); text-decoration: none; }
   <h1>COCKPITFLOW</h1>
   <p>Open-source cockpit companion for X-Plane and MSFS. Custom layouts, checklists, hardware integration. Community-driven.</p>
   <div class="hero-btns">
-    <a href="https://github.com/user/cockpitflow/releases" class="btn btn-primary">Download for Windows</a>
-    <a href="https://github.com/user/cockpitflow" class="btn btn-secondary">View on GitHub</a>
+    <a href="download.html" class="btn btn-primary">Download for Windows</a>
+    <a href="https://github.com/CockpitFlow/cockpitflow" class="btn btn-secondary">View on GitHub</a>
   </div>
 </div>
 
@@ -205,7 +88,6 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="section-label">FEATURES</div>
     <h2 class="section-title">Everything you need in the cockpit</h2>
     <p class="section-desc">CockpitFlow connects your phone, tablet, or custom hardware panel to your flight simulator.</p>
-
     <div class="features">
       <div class="feature">
         <div class="feature-icon">&#9992;</div>
@@ -256,47 +138,32 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
 </section>
 
-<section id="how" style="background: var(--surface);">
+<section style="background: var(--surface);">
   <div class="container">
     <div class="section-label">HOW IT WORKS</div>
     <h2 class="section-title">Up and running in 2 minutes</h2>
-
     <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <h3>Install CockpitFlow</h3>
-        <p>Download and run the desktop app. It connects to X-Plane or MSFS automatically.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <h3>Install Mobile App</h3>
-        <p>Install the Android companion. It auto-discovers CockpitFlow on your network.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <h3>Fly</h3>
-        <p>Cockpit controls and checklists on your phone. Everything synced live.</p>
-      </div>
+      <div class="step"><div class="step-num">01</div><h3>Install CockpitFlow</h3><p>Download and run the desktop app. It connects to X-Plane or MSFS automatically.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>Install Mobile App</h3><p>Install the Android companion. It auto-discovers CockpitFlow on your network.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Fly</h3><p>Cockpit controls and checklists on your phone. Everything synced live.</p></div>
     </div>
   </div>
 </section>
 
-<section id="tools">
+<section>
   <div class="container">
     <div class="section-label">COMMUNITY TOOLS</div>
     <h2 class="section-title">Create and share</h2>
-    <p class="section-desc">Build presets for any aircraft. Share with the community.</p>
-
     <div class="tools">
       <div class="tool">
         <h3>Checklist Editor</h3>
         <p>Visual editor for aircraft checklists. Create phases, items, auto-detect rules. Export as JSON.</p>
-        <a href="editor.html">Open Editor &rarr;</a>
+        <a href="checklist-editor.html">Open Editor &rarr;</a>
       </div>
       <div class="tool">
         <h3>Cockpit Builder</h3>
         <p>Design cockpit layouts in the desktop app. Grid-based, drag components, customize everything.</p>
-        <a href="https://github.com/user/cockpitflow">Learn more &rarr;</a>
+        <a href="cockpit.html">Learn more &rarr;</a>
       </div>
     </div>
   </div>
@@ -306,10 +173,8 @@ footer a { color: var(--accent); text-decoration: none; }
   <div class="container">
     <div class="section-label">OPEN SOURCE</div>
     <h2 class="section-title">Built by the community</h2>
-    <p class="section-desc">CockpitFlow is free and open source. Contribute presets, translations, or code.</p>
-
-    <div class="community-grid">
-      <div class="comm-card"><h3>3</h3><p>Checklist presets</p></div>
+    <div class="comm-grid">
+      <div class="comm-card"><h3>3+</h3><p>Aircraft presets</p></div>
       <div class="comm-card"><h3>13</h3><p>Languages</p></div>
       <div class="comm-card"><h3>100%</h3><p>Free & open source</p></div>
     </div>
@@ -317,7 +182,7 @@ footer a { color: var(--accent); text-decoration: none; }
 </section>
 
 <footer>
-  <p>CockpitFlow &mdash; Open source flight simulator cockpit companion. <a href="https://github.com/user/cockpitflow">GitHub</a></p>
+  <p>CockpitFlow — Open source flight simulator cockpit companion. <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p>
   <p style="margin-top:8px;opacity:.5">Not affiliated with any aircraft manufacturer. For simulation use only.</p>
 </footer>
 
