@@ -38,6 +38,8 @@
 .demo-item.checked { opacity: .5; }
 .demo-item.checked .demo-chk { background: var(--green); border-color: var(--green); }
 .demo-item.checked .demo-label { text-decoration: line-through; }
+.demo-item.current { border-color: var(--accent); background: rgba(74,158,255,.03); }
+.demo-item.locked { opacity: .3; pointer-events: none; }
 .demo-chk {
   width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
   border: 2px solid var(--border); transition: all .15s;
@@ -121,6 +123,13 @@
     <p class="section-desc">This is exactly how it looks on your phone. Tap items to check them off. Green dots = sim detected correct state.</p>
 
     <div class="demo-wrap" id="demo">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);background:#0f1319">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim)">Cessna 172S Skyhawk</span>
+        <div style="display:flex;gap:2px">
+          <button id="modeStrict" onclick="setMode('strict')" style="padding:3px 10px;background:#0a0e14;border:1px solid var(--border);border-radius:3px 0 0 3px;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">STRICT</button>
+          <button id="modeSmart" onclick="setMode('smart')" style="padding:3px 10px;background:rgba(74,158,255,.08);border:1px solid var(--accent);border-radius:0 3px 3px 0;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">SMART</button>
+        </div>
+      </div>
       <div class="demo-bar" id="demoTabs"></div>
       <div class="demo-items" id="demoItems"></div>
       <div class="demo-footer">
@@ -329,6 +338,18 @@ const demoData = {
 
 let demoPhase = 0;
 let demoChecked = {};
+let demoMode = 'smart';
+
+function setMode(m) {
+  demoMode = m;
+  document.getElementById('modeStrict').style.background = m === 'strict' ? 'rgba(74,158,255,.08)' : '#0a0e14';
+  document.getElementById('modeStrict').style.borderColor = m === 'strict' ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('modeStrict').style.color = m === 'strict' ? 'var(--accent)' : 'var(--dim)';
+  document.getElementById('modeSmart').style.background = m === 'smart' ? 'rgba(74,158,255,.08)' : '#0a0e14';
+  document.getElementById('modeSmart').style.borderColor = m === 'smart' ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('modeSmart').style.color = m === 'smart' ? 'var(--accent)' : 'var(--dim)';
+  renderDemo();
+}
 
 function renderDemo() {
   const tabs = document.getElementById('demoTabs');
@@ -340,10 +361,14 @@ function renderDemo() {
     return `<button class="demo-tab${i === demoPhase ? ' on' : ''}${allDone ? ' done' : ''}" onclick="demoPhase=${i};renderDemo()">${p.name}</button>`;
   }).join('');
 
+  const firstUnchecked = phase.items.findIndex((_, i) => !demoChecked[`${demoPhase}-${i}`]);
+
   items.innerHTML = phase.items.map((item, i) => {
     const key = `${demoPhase}-${i}`;
     const checked = demoChecked[key];
-    return `<div class="demo-item${checked ? ' checked' : ''}" onclick="demoChecked['${key}']=!demoChecked['${key}'];renderDemo()">
+    const isCurrent = demoMode === 'strict' && i === firstUnchecked;
+    const isLocked = demoMode === 'strict' && i > firstUnchecked && firstUnchecked >= 0 && !checked;
+    return `<div class="demo-item${checked ? ' checked' : ''}${isCurrent ? ' current' : ''}${isLocked ? ' locked' : ''}" onclick="${isLocked ? '' : `demoChecked['${key}']=!demoChecked['${key}'];renderDemo()`}">
       <div class="demo-chk"></div>
       <span class="demo-label">${item.label}</span>
       <span class="demo-exp">${item.expected}</span>
