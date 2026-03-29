@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cockpit Controls — CockpitFlow</title>
+<meta name="description" content="Turn your phone into a cockpit panel. Touch controls, gyro yoke, live gauges. Custom grid layouts.">
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand"><img src="logo.png" class="nav-logo" alt=""><span class="nav-name">COCKPITFLOW</span></a>
+  <div class="nav-links">
+    <a href="checklist.html">Checklist</a>
+    <a href="cockpit.html" class="active">Cockpit</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="editor.html">Editor</a>
+    <a href="download.html">Download</a>
+  </div>
+  <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
+</nav>
+
+<div class="page-hero">
+  <span class="emoji">&#9992;</span>
+  <h1>COCKPIT CONTROLS</h1>
+  <p>Turn your phone or tablet into a fully functional cockpit panel. Touch levers, gyroscope yoke, live gauges, switches — all customizable via JSON.</p>
+  <div class="btn-row">
+    <a href="download.html" class="btn btn-primary">Get the App</a>
+    <a href="https://github.com/CockpitFlow/cockpitflow-data/tree/main/cockpit" class="btn btn-secondary">Browse Layouts</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">CONTROLS</div>
+    <h2 class="section-title">Everything at your fingertips</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">&#127918;</div>
+        <h3>Yoke — Touch + Gyro</h3>
+        <p>Touch pad with spring-back or tilt your device like a real yoke. Sensitivity and deadzone adjustable. Orientation-aware.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128316;</div>
+        <h3>Levers</h3>
+        <p>Vertical sliders for throttle, mixture, carb heat. Color-coded thumbs. Drag with your finger — smooth and responsive.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128200;</div>
+        <h3>Live Gauges</h3>
+        <p>IAS, altitude, VS, heading, RPM — live from the sim. Color-coded warnings (green/amber/red).</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128280;</div>
+        <h3>Switches</h3>
+        <p>Toggle switches for master, lights, fuel pump, avionics. Pill-style with red (master) and blue (systems) variants.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128295;</div>
+        <h3>Flaps & Trim</h3>
+        <p>Flap detent buttons (UP/10/20/FULL). Trim up/down with auto-repeat. All mapped to sim commands.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128273;</div>
+        <h3>Magneto</h3>
+        <p>OFF/R/L/BOTH/START positions. Spring-back on START. Works like the real thing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--surface);">
+  <div class="container">
+    <div class="section-label">LAYOUT ENGINE</div>
+    <h2 class="section-title">Grid-based, fully customizable</h2>
+    <p class="section-desc">Every cockpit layout is a JSON file with a grid (12×8 default). Each component has a position (col, row) and size (w, h). Design in the desktop app, fly on mobile.</p>
+    <div class="code-block"><pre>{
+  <span class="key">"grid"</span>: { <span class="key">"cols"</span>: <span class="num">12</span>, <span class="key">"rows"</span>: <span class="num">8</span> },
+  <span class="key">"components"</span>: [
+    { <span class="key">"type"</span>: <span class="str">"lever"</span>, <span class="key">"col"</span>: <span class="num">1</span>, <span class="key">"row"</span>: <span class="num">1</span>, <span class="key">"w"</span>: <span class="num">1</span>, <span class="key">"h"</span>: <span class="num">7</span>, <span class="key">"cmd"</span>: <span class="str">"THROTTLE"</span> },
+    { <span class="key">"type"</span>: <span class="str">"yoke"</span>, <span class="key">"col"</span>: <span class="num">5</span>, <span class="key">"row"</span>: <span class="num">1</span>, <span class="key">"w"</span>: <span class="num">5</span>, <span class="key">"h"</span>: <span class="num">7</span>, <span class="key">"modes"</span>: [<span class="str">"touch"</span>, <span class="str">"gyro"</span>] },
+    { <span class="key">"type"</span>: <span class="str">"gauge"</span>, <span class="key">"col"</span>: <span class="num">10</span>, <span class="key">"row"</span>: <span class="num">1</span>, <span class="key">"w"</span>: <span class="num">3</span>, <span class="key">"h"</span>: <span class="num">1</span>, <span class="key">"dataref"</span>: <span class="str">"AIRSPEED"</span> }
+  ]
+}</pre></div>
+    <div class="features" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="feature">
+        <h3>10 Component Types</h3>
+        <p>lever, toggle, magneto, yoke, gauge, flaps, trim, fuel-selector, radio, label</p>
+      </div>
+      <div class="feature">
+        <h3>Theming</h3>
+        <p>Custom colors for accent, green, amber, red. Orbitron + Share Tech Mono fonts. Dark cockpit aesthetic.</p>
+      </div>
+      <div class="feature">
+        <h3>Desktop Builder</h3>
+        <p>Visual grid editor in the desktop app. Place components, set properties, preview live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>CockpitFlow — Open source flight simulator cockpit companion. <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p>
+</footer>
+
+</body>
+</html>

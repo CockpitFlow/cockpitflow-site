@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardware Integration — CockpitFlow</title>
+<meta name="description" content="Connect Arduino and ESP32 to your flight simulator. Flash firmware, map pins, calibrate analog inputs.">
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand"><img src="logo.png" class="nav-logo" alt=""><span class="nav-name">COCKPITFLOW</span></a>
+  <div class="nav-links">
+    <a href="checklist.html">Checklist</a>
+    <a href="cockpit.html">Cockpit</a>
+    <a href="hardware.html" class="active">Hardware</a>
+    <a href="editor.html">Editor</a>
+    <a href="download.html">Download</a>
+  </div>
+  <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
+</nav>
+
+<div class="page-hero">
+  <span class="emoji">&#128268;</span>
+  <h1>HARDWARE</h1>
+  <p>Connect Arduino and ESP32 boards to your flight simulator. Flash firmware, map pins to sim functions, calibrate analog inputs. Serial and WiFi.</p>
+  <div class="btn-row">
+    <a href="download.html" class="btn btn-primary">Get the App</a>
+    <a href="https://github.com/CockpitFlow/cockpitflow-data/tree/main/hardware" class="btn btn-secondary">Browse Profiles</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">SUPPORTED BOARDS</div>
+    <h2 class="section-title">From Arduino Nano to ESP32</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">&#9889;</div>
+        <h3>Arduino Mega 2560</h3>
+        <p>54 digital I/O + 16 analog. Perfect for full cockpit panels. Serial USB at 115200 baud.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128225;</div>
+        <h3>Arduino Nano</h3>
+        <p>Compact — 14 digital + 8 analog. Great for small panels (radio stack, switch panel).</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128246;</div>
+        <h3>ESP32 (WiFi)</h3>
+        <p>Wireless via UDP. No USB cable needed. ESP32, ESP32-S3, ESP32-C6 supported. Flash from the app.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--surface);">
+  <div class="container">
+    <div class="section-label">WORKFLOW</div>
+    <h2 class="section-title">From board to cockpit in minutes</h2>
+    <div class="features" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="feature" style="text-align:center">
+        <div class="feature-icon">1&#65039;&#8419;</div>
+        <h3>Flash</h3>
+        <p>Flash CockpitFlow firmware from the app. Auto-detect board type.</p>
+      </div>
+      <div class="feature" style="text-align:center">
+        <div class="feature-icon">2&#65039;&#8419;</div>
+        <h3>Map</h3>
+        <p>Drag & drop pin mapping. Assign buttons, encoders, pots to sim functions.</p>
+      </div>
+      <div class="feature" style="text-align:center">
+        <div class="feature-icon">3&#65039;&#8419;</div>
+        <h3>Calibrate</h3>
+        <p>Set deadzone, curve (linear/log/exp), min/max for analog inputs.</p>
+      </div>
+      <div class="feature" style="text-align:center">
+        <div class="feature-icon">4&#65039;&#8419;</div>
+        <h3>Fly</h3>
+        <p>Everything works. Live monitor shows pin events in real-time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-label">PIN TYPES</div>
+    <h2 class="section-title">Every input and output</h2>
+    <div class="features" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="feature">
+        <h3>Buttons & Toggles</h3>
+        <p>Momentary push buttons and on/off toggle switches. Debounced in firmware.</p>
+      </div>
+      <div class="feature">
+        <h3>Encoders</h3>
+        <p>Rotary encoders with CW/CCW events. Configurable steps per detent. Perfect for heading, altitude, radio tuning.</p>
+      </div>
+      <div class="feature">
+        <h3>Potentiometers</h3>
+        <p>Analog sliders and knobs. 10-bit resolution. Deadzone and curve calibration built-in.</p>
+      </div>
+      <div class="feature">
+        <h3>LEDs</h3>
+        <p>Output pins driven by sim state. Gear lights, AP indicators, warning lamps.</p>
+      </div>
+      <div class="feature">
+        <h3>Displays</h3>
+        <p>7-segment (TM1637) and OLED displays. Show frequencies, altitude, heading.</p>
+      </div>
+      <div class="feature">
+        <h3>Servos & Steppers</h3>
+        <p>Drive physical gauge needles. Map sim values to servo positions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--surface);">
+  <div class="container">
+    <div class="section-label">PROFILES</div>
+    <h2 class="section-title">Ready-made mappings</h2>
+    <p class="section-desc">Download profiles from the marketplace or community GitHub. Or create your own and share.</p>
+    <div class="features" style="grid-template-columns: 1fr 1fr;">
+      <div class="feature">
+        <h3>Arduino Mega → Cessna 172</h3>
+        <p>Throttle, mixture, master switches, encoders for heading/altitude, gear LEDs, AP indicator.</p>
+      </div>
+      <div class="feature">
+        <h3>ESP32 Radio Panel</h3>
+        <p>WiFi radio tuning panel. COM/NAV encoders, frequency swap button, 7-segment display.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>CockpitFlow — Open source flight simulator cockpit companion. <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p>
+</footer>
+
+</body>
+</html>
