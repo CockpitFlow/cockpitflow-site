@@ -4,9 +4,94 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checklist Module — CockpitFlow</title>
-<meta name="description" content="Smart checklists for any aircraft. Auto-detect from sim data. Strict and smart modes. Community presets.">
+<meta name="description" content="Smart aircraft checklists with auto-detect from sim data. Cessna 172, Boeing 747, Airbus A320 and more. Open source.">
 <link rel="icon" href="logo.png">
 <link rel="stylesheet" href="style.css">
+<style>
+/* Demo checklist */
+.demo-wrap {
+  max-width: 420px; margin: 0 auto;
+  background: #0a0e14; border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.demo-bar {
+  display: flex; overflow-x: auto; background: #0f1319;
+  border-bottom: 1px solid var(--border); padding: 0 4px;
+}
+.demo-bar::-webkit-scrollbar { height: 0; }
+.demo-tab {
+  padding: 8px 14px; background: none; border: none;
+  color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; flex-shrink: 0;
+}
+.demo-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.demo-tab.done { color: var(--green); }
+.demo-items { padding: 8px; max-height: 320px; overflow-y: auto; }
+.demo-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; margin-bottom: 4px;
+  background: #0f1319; border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+}
+.demo-item:hover { border-color: rgba(74,158,255,.15); }
+.demo-item.checked { opacity: .5; }
+.demo-item.checked .demo-chk { background: var(--green); border-color: var(--green); }
+.demo-item.checked .demo-label { text-decoration: line-through; }
+.demo-chk {
+  width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+  border: 2px solid var(--border); transition: all .15s;
+  position: relative;
+}
+.demo-item.checked .demo-chk::after {
+  content: ''; position: absolute; left: 5px; top: 1px;
+  width: 5px; height: 10px; border: solid #fff;
+  border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.demo-label { font-size: 13px; font-weight: 500; flex: 1; }
+.demo-exp {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--accent); padding: 1px 6px; background: rgba(74,158,255,.06);
+  border-radius: 3px;
+}
+.demo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.demo-dot.ok { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.demo-dot.fail { background: var(--red); box-shadow: 0 0 4px var(--red); }
+.demo-dot.na { background: var(--dim); }
+.demo-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim);
+}
+.demo-footer strong { color: var(--green); }
+.demo-hint {
+  text-align: center; padding: 8px; font-size: 10px; color: var(--dim);
+  border-top: 1px solid rgba(255,255,255,.02);
+}
+
+/* Comparison */
+.cmp-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.cmp-table th, .cmp-table td {
+  padding: 10px 14px; text-align: left; font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.cmp-table th { color: var(--dim); font-size: 11px; font-weight: 600; letter-spacing: .5px; }
+.cmp-table td:first-child { color: #fff; font-weight: 500; }
+.cmp-yes { color: var(--green); }
+.cmp-no { color: var(--dim); }
+.cmp-table tr:hover td { background: rgba(74,158,255,.02); }
+
+/* Tutorial steps */
+.tut-steps { display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
+.tut-step { display: flex; gap: 20px; align-items: flex-start; }
+.tut-num {
+  font-family: 'Orbitron'; font-size: 28px; font-weight: 700;
+  color: rgba(74,158,255,.15); flex-shrink: 0; width: 40px;
+}
+.tut-content { flex: 1; }
+.tut-content h3 { font-size: 15px; color: #fff; margin-bottom: 4px; }
+.tut-content p { font-size: 13px; color: var(--dim); }
+</style>
 </head>
 <body>
 
@@ -24,79 +109,95 @@
 </nav>
 
 <div class="page-hero">
-  <span class="emoji">&#9745;</span>
   <h1>CHECKLIST</h1>
-  <p>Smart checklists for any aircraft. Auto-detect items from sim data. Strict or flexible mode. Works on desktop, phone, and tablet.</p>
-  <div class="btn-row">
-    <a href="editor.html" class="btn btn-primary">Create a Checklist</a>
-    <a href="https://github.com/CockpitFlow/cockpitflow-data/tree/main/checklists" class="btn btn-secondary">Browse Presets</a>
-  </div>
+  <p>Aircraft checklists that know what's happening in the sim. Auto-detect switch positions, strict flow enforcement, dual simulator support. Not just a list — a co-pilot.</p>
 </div>
 
+<!-- LIVE DEMO -->
 <section>
   <div class="container">
-    <div class="section-label">FEATURES</div>
-    <h2 class="section-title">More than a paper checklist</h2>
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">&#128260;</div>
-        <h3>Two Modes</h3>
-        <p><strong>Strict</strong> — items in order, current highlighted, rest locked. <strong>Smart</strong> — check any item in any order.</p>
+    <div class="section-label">TRY IT</div>
+    <h2 class="section-title">Interactive demo</h2>
+    <p class="section-desc">This is exactly how it looks on your phone. Tap items to check them off. Green dots = sim detected correct state.</p>
+
+    <div class="demo-wrap" id="demo">
+      <div class="demo-bar" id="demoTabs"></div>
+      <div class="demo-items" id="demoItems"></div>
+      <div class="demo-footer">
+        <span><strong id="demoDone">0</strong>/<span id="demoTotal">0</span></span>
+        <span>Pre-Flight</span>
       </div>
-      <div class="feature">
-        <div class="feature-icon">&#9889;</div>
-        <h3>Auto-Detect</h3>
-        <p>Items auto-check when the sim detects the correct state. Supports both X-Plane datarefs and MSFS SimVars.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">&#128994;</div>
-        <h3>Feedback Dots</h3>
-        <p>Green/red dots show real-time sim state for each item. See at a glance what's done and what needs attention.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">&#128241;</div>
-        <h3>Mobile Companion</h3>
-        <p>Checklist runs on your phone or tablet. Desktop controls settings, mobile just shows the checklist — clean and touch-optimized.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">&#9992;</div>
-        <h3>Any Aircraft</h3>
-        <p>Community presets for Cessna 172, Boeing 747, Airbus A320, and more. Or create your own with the visual editor.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">&#128190;</div>
-        <h3>JSON-Based</h3>
-        <p>Everything is a JSON file. Edit in any text editor, share on Discord, submit to GitHub. No proprietary format.</p>
-      </div>
+      <div class="demo-hint">&#9650; This is a live demo — tap the checkboxes</div>
     </div>
   </div>
 </section>
 
+<!-- WHY -->
 <section style="background: var(--surface);">
   <div class="container">
-    <div class="section-label">HOW IT WORKS</div>
-    <h2 class="section-title">Desktop configures, mobile displays</h2>
-    <p class="section-desc">Settings live in the desktop app. The mobile companion just shows the active checklist — no menus, no distractions.</p>
-    <div class="features" style="grid-template-columns: 1fr 1fr;">
-      <div class="feature">
-        <h3>On Desktop</h3>
-        <p>Choose aircraft preset. Set mode (strict/smart). Enable auto-detect and feedback dots. Everything syncs to mobile automatically.</p>
-      </div>
-      <div class="feature">
-        <h3>On Mobile</h3>
-        <p>Open CockpitFlow app. Tap Checklist. Phase tabs at top, items below. Tap to check. How-to guide on tap. Progress at bottom.</p>
-      </div>
-    </div>
+    <div class="section-label">WHY</div>
+    <h2 class="section-title">Why not just use a PDF?</h2>
+
+    <table class="cmp-table">
+      <thead>
+        <tr><th>Feature</th><th>Paper/PDF</th><th>Other apps</th><th>CockpitFlow</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Auto-detect from sim</td>
+          <td class="cmp-no">No</td>
+          <td class="cmp-no">Some (MSFS only)</td>
+          <td class="cmp-yes">X-Plane + MSFS</td>
+        </tr>
+        <tr>
+          <td>Strict/Smart modes</td>
+          <td class="cmp-no">No</td>
+          <td class="cmp-no">Usually strict only</td>
+          <td class="cmp-yes">Both</td>
+        </tr>
+        <tr>
+          <td>Community presets</td>
+          <td class="cmp-no">No</td>
+          <td class="cmp-no">Limited</td>
+          <td class="cmp-yes">Open GitHub repo</td>
+        </tr>
+        <tr>
+          <td>Create your own</td>
+          <td class="cmp-no">Word/PDF</td>
+          <td class="cmp-no">App-specific format</td>
+          <td class="cmp-yes">Visual editor + JSON</td>
+        </tr>
+        <tr>
+          <td>Mobile companion</td>
+          <td class="cmp-no">Print it</td>
+          <td class="cmp-yes">Some</td>
+          <td class="cmp-yes">Android app + any browser</td>
+        </tr>
+        <tr>
+          <td>Open source</td>
+          <td class="cmp-no">N/A</td>
+          <td class="cmp-no">Usually no</td>
+          <td class="cmp-yes">MIT License</td>
+        </tr>
+        <tr>
+          <td>Price</td>
+          <td class="cmp-yes">Free</td>
+          <td class="cmp-no">$5-20</td>
+          <td class="cmp-yes">Free forever</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
+<!-- DUAL SIM -->
 <section>
   <div class="container">
-    <div class="section-label">DUAL SIMULATOR SUPPORT</div>
-    <h2 class="section-title">X-Plane and MSFS in one file</h2>
-    <p class="section-desc">Each auto-detect item can have both an X-Plane dataref and an MSFS SimVar. The app uses the right one based on which sim is connected.</p>
+    <div class="section-label">DUAL SIMULATOR</div>
+    <h2 class="section-title">One file, two simulators</h2>
+    <p class="section-desc">Each auto-detect item has both an X-Plane dataref and MSFS SimVar. The app uses the right one based on which sim is connected. Checklist authors fill in both — users don't have to think about it.</p>
     <div class="code-block"><pre>{
-  <span class="key">"label"</span>: <span class="str">"Master Switch"</span>,
+  <span class="key">"label"</span>: <span class="str">"Master Battery"</span>,
   <span class="key">"expected"</span>: <span class="str">"ON"</span>,
   <span class="key">"auto_detect"</span>: {
     <span class="key">"condition"</span>: <span class="str">"&gt; 0"</span>,
@@ -104,25 +205,73 @@
     <span class="key">"msfs_simvar"</span>: <span class="str">"ELECTRICAL MASTER BATTERY"</span>
   }
 }</pre></div>
+    <p style="font-size:13px;color:var(--dim);margin-top:12px">When connected to X-Plane, it reads <code style="color:var(--accent)">sim/cockpit/electrical/battery_on</code>. When connected to MSFS, it reads <code style="color:var(--accent)">ELECTRICAL MASTER BATTERY</code>. Same condition (<code style="color:var(--amber)">> 0</code>) for both.</p>
   </div>
 </section>
 
+<!-- HOW TO CREATE -->
 <section style="background: var(--surface);">
   <div class="container">
-    <div class="section-label">AVAILABLE PRESETS</div>
-    <h2 class="section-title">Ready to fly</h2>
+    <div class="section-label">CREATE</div>
+    <h2 class="section-title">Make a checklist in 5 minutes</h2>
+
+    <div class="tut-steps">
+      <div class="tut-step">
+        <span class="tut-num">01</span>
+        <div class="tut-content">
+          <h3>Open the editor</h3>
+          <p>Go to <a href="editor.html" style="color:var(--accent)">the visual editor</a>. No install needed — it runs in your browser.</p>
+        </div>
+      </div>
+      <div class="tut-step">
+        <span class="tut-num">02</span>
+        <div class="tut-content">
+          <h3>Add phases and items</h3>
+          <p>Create phases (Pre-Flight, Engine Start, Taxi...). Add items with label, expected value, and how-to instructions. Drag to reorder.</p>
+        </div>
+      </div>
+      <div class="tut-step">
+        <span class="tut-num">03</span>
+        <div class="tut-content">
+          <h3>Add auto-detect (optional)</h3>
+          <p>For each item, add the X-Plane dataref and/or MSFS SimVar that corresponds to this action. Set the condition (e.g. <code style="color:var(--accent)">> 0</code> for ON, <code style="color:var(--accent)">== 4</code> for BOTH fuel selector).</p>
+        </div>
+      </div>
+      <div class="tut-step">
+        <span class="tut-num">04</span>
+        <div class="tut-content">
+          <h3>Export JSON</h3>
+          <p>Click "Export JSON". You get a clean file ready to use.</p>
+        </div>
+      </div>
+      <div class="tut-step">
+        <span class="tut-num">05</span>
+        <div class="tut-content">
+          <h3>Share it</h3>
+          <p>Import into the desktop app, or submit a Pull Request to <a href="https://github.com/CockpitFlow/cockpitflow-data" style="color:var(--accent)">cockpitflow-data</a> so everyone can use it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRESETS -->
+<section>
+  <div class="container">
+    <div class="section-label">AVAILABLE NOW</div>
+    <h2 class="section-title">Ready-made checklists</h2>
     <div class="features">
       <div class="feature">
         <h3>Cessna 172S Skyhawk</h3>
-        <p>15 phases, 89 items. Complete pre-flight to shutdown. Full auto-detect for both sims.</p>
+        <p>15 phases, 89 items. Pre-flight inspection through shutdown. Full auto-detect for both X-Plane and MSFS. The gold standard GA checklist.</p>
       </div>
       <div class="feature">
         <h3>Boeing 747-400</h3>
-        <p>12 phases. Cockpit prep, engine start (4 engines), approach, landing, shutdown.</p>
+        <p>12 phases. 4-engine start sequence, approach briefing, autobrake settings. Built for PMDG and default 747.</p>
       </div>
       <div class="feature">
         <h3>Airbus A320neo</h3>
-        <p>16 phases including FMGC setup. Airbus-specific flows and callouts.</p>
+        <p>16 phases including FMGC setup and Airbus-specific flows. ECAM references, FCU procedures, APU management.</p>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px">
@@ -131,18 +280,83 @@
   </div>
 </section>
 
-<section>
-  <div class="container" style="text-align:center">
-    <div class="section-label">CREATE YOUR OWN</div>
-    <h2 class="section-title">Visual Checklist Editor</h2>
-    <p class="section-desc" style="margin:0 auto 24px">Create checklists for any aircraft. Add phases, items, auto-detect rules. Drag to reorder. Export as JSON. Share with the community.</p>
-    <a href="editor.html" class="btn btn-primary">Open Editor</a>
+<!-- CTA -->
+<section style="background: var(--surface); text-align: center;">
+  <div class="container">
+    <h2 class="section-title">Start using checklists</h2>
+    <p class="section-desc" style="margin: 0 auto 24px;">Download the app and install a checklist from the marketplace. Or create your own.</p>
+    <div class="btn-row">
+      <a href="download.html" class="btn btn-primary">Download App</a>
+      <a href="editor.html" class="btn btn-secondary">Open Editor</a>
+    </div>
   </div>
 </section>
 
 <footer>
   <p>CockpitFlow — Open source flight simulator cockpit companion. <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p>
+  <p style="margin-top:8px;opacity:.5">Aircraft names are trademarks of their respective manufacturers. Not affiliated with or endorsed by any aircraft manufacturer.</p>
 </footer>
 
+<script>
+// Live demo checklist
+const demoData = {
+  phases: [
+    { name: 'Pre-Flight', items: [
+      { label: 'Documents (ARROW)', expected: 'CHECK', dot: 'na' },
+      { label: 'Fuel Quantity', expected: 'CHECK', dot: 'ok' },
+      { label: 'Fuel Selector', expected: 'BOTH', dot: 'ok' },
+      { label: 'Master Switch', expected: 'ON', dot: 'fail' },
+      { label: 'Fuel Gauges', expected: 'CHECK', dot: 'na' },
+      { label: 'Flaps', expected: 'UP', dot: 'ok' },
+      { label: 'Avionics Master', expected: 'OFF', dot: 'ok' },
+      { label: 'Master Switch', expected: 'OFF', dot: 'ok' },
+    ]},
+    { name: 'Engine Start', items: [
+      { label: 'Mixture', expected: 'RICH', dot: 'ok' },
+      { label: 'Carburetor Heat', expected: 'OFF', dot: 'ok' },
+      { label: 'Throttle', expected: '1/4 INCH', dot: 'na' },
+      { label: 'Master Switch', expected: 'ON', dot: 'fail' },
+      { label: 'Beacon', expected: 'ON', dot: 'fail' },
+      { label: 'Ignition', expected: 'START', dot: 'na' },
+    ]},
+    { name: 'Taxi', items: [
+      { label: 'Parking Brake', expected: 'RELEASE', dot: 'ok' },
+      { label: 'Radios', expected: 'SET', dot: 'na' },
+      { label: 'Instruments', expected: 'CHECK', dot: 'na' },
+    ]},
+  ]
+};
+
+let demoPhase = 0;
+let demoChecked = {};
+
+function renderDemo() {
+  const tabs = document.getElementById('demoTabs');
+  const items = document.getElementById('demoItems');
+  const phase = demoData.phases[demoPhase];
+
+  tabs.innerHTML = demoData.phases.map((p, i) => {
+    const allDone = p.items.every((_, j) => demoChecked[`${i}-${j}`]);
+    return `<button class="demo-tab${i === demoPhase ? ' on' : ''}${allDone ? ' done' : ''}" onclick="demoPhase=${i};renderDemo()">${p.name}</button>`;
+  }).join('');
+
+  items.innerHTML = phase.items.map((item, i) => {
+    const key = `${demoPhase}-${i}`;
+    const checked = demoChecked[key];
+    return `<div class="demo-item${checked ? ' checked' : ''}" onclick="demoChecked['${key}']=!demoChecked['${key}'];renderDemo()">
+      <div class="demo-chk"></div>
+      <span class="demo-label">${item.label}</span>
+      <span class="demo-exp">${item.expected}</span>
+      <span class="demo-dot ${item.dot}"></span>
+    </div>`;
+  }).join('');
+
+  const total = demoData.phases.reduce((s, p) => s + p.items.length, 0);
+  const done = Object.values(demoChecked).filter(Boolean).length;
+  document.getElementById('demoDone').textContent = done;
+  document.getElementById('demoTotal').textContent = total;
+}
+renderDemo();
+</script>
 </body>
 </html>
