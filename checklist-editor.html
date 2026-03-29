@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Editor — CockpitFlow</title>
+<meta name="description" content="Visual checklist editor for flight simulators. Create phases, items, auto-detect rules. Export JSON. Free.">
+
+<style>
+:root {
+  --bg: #0a0e14; --surface: #0f1319; --surface2: #141a22;
+  --border: #1e2736; --text: #b8c4d0; --dim: #4e5c6e;
+  --accent: #4a9eff; --green: #34d058; --red: #ea4a5a; --amber: #e3b341;
+}
+body { font-size: 13px; }
+
+/* Layout — full height minus nav */
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Toolbar */
+.toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; background: var(--surface);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.toolbar-title { font-size: 11px; font-weight: 600; color: var(--dim); letter-spacing: 1.5px; font-family: 'Orbitron', sans-serif; margin-right: 8px; }
+.tb-btn {
+  padding: 6px 14px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 4px;
+  color: var(--dim); font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.tb-btn:hover { border-color: var(--dim); color: var(--text); }
+.tb-btn.primary { background: rgba(74,158,255,.1); border-color: rgba(74,158,255,.3); color: var(--accent); }
+.tb-input {
+  padding: 6px 10px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-size: 12px; outline: none; width: 200px;
+}
+.tb-input:focus { border-color: var(--accent); }
+.tb-spacer { flex: 1; }
+.tb-hint { font-size: 10px; color: var(--dim); }
+
+/* Main */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar: phases */
+.sidebar {
+  width: 220px; background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sb-header {
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sb-label { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1px; }
+.sb-add {
+  padding: 2px 8px; background: none; border: 1px solid var(--border);
+  border-radius: 3px; color: var(--dim); font-size: 11px; cursor: pointer;
+}
+.sb-add:hover { border-color: var(--accent); color: var(--accent); }
+.phase-list { flex: 1; overflow-y: auto; padding: 4px; }
+.phase-item {
+  padding: 8px 10px; border-radius: 4px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 2px; transition: background .1s;
+}
+.phase-item:hover { background: var(--surface2); }
+.phase-item.active { background: rgba(74,158,255,.08); }
+.phase-name { font-size: 12px; font-weight: 500; }
+.phase-count { font-size: 10px; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+.phase-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .1s; }
+.phase-item:hover .phase-actions { opacity: 1; }
+.phase-act {
+  padding: 1px 4px; background: none; border: none;
+  color: var(--dim); font-size: 10px; cursor: pointer;
+}
+.phase-act:hover { color: var(--red); }
+
+/* Content: items */
+.content { flex: 1; overflow-y: auto; padding: 16px; }
+.content-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+}
+.content-phase-name {
+  font-size: 18px; font-weight: 700; color: #fff; flex: 1;
+}
+.content-phase-input {
+  font-size: 18px; font-weight: 700; color: #fff;
+  background: none; border: none; border-bottom: 2px solid var(--accent);
+  outline: none; flex: 1; font-family: inherit; padding: 2px 0;
+}
+
+.item-card {
+  padding: 12px 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  margin-bottom: 6px; transition: all .15s;
+  cursor: default;
+}
+.item-card:hover { border-color: rgba(74,158,255,.15); }
+.item-card.dragging { opacity: .3; }
+.item-card.drag-over { border-color: var(--accent); border-style: dashed; }
+.item-drag-handle {
+  cursor: grab; color: var(--dim); font-size: 14px; padding: 2px 4px;
+  user-select: none; opacity: .4; transition: opacity .1s;
+}
+.item-drag-handle:hover { opacity: 1; }
+.item-drag-handle:active { cursor: grabbing; }
+.item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.item-input {
+  padding: 5px 8px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text); font-size: 12px; outline: none;
+  font-family: inherit;
+}
+.item-input:focus { border-color: var(--accent); }
+.item-input.label { flex: 1; font-weight: 600; }
+.item-input.expected { width: 100px; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+.item-input.full { flex: 1; }
+.item-field-label { font-size: 9px; color: var(--dim); font-weight: 600; letter-spacing: .5px; }
+.item-del {
+  padding: 4px 8px; background: none; border: 1px solid var(--border);
+  border-radius: 3px; color: var(--dim); font-size: 10px; cursor: pointer;
+}
+.item-del:hover { border-color: var(--red); color: var(--red); }
+.item-autodetect {
+  display: flex; gap: 6px; align-items: center;
+  padding: 6px 8px; background: var(--bg); border-radius: 4px;
+  margin-top: 4px;
+}
+.item-autodetect .item-input { font-size: 11px; background: var(--surface); }
+
+.add-item-btn {
+  padding: 10px; background: none; border: 2px dashed var(--border);
+  border-radius: 6px; color: var(--dim); font-size: 12px; font-weight: 600;
+  cursor: pointer; width: 100%; text-align: center; margin-top: 8px;
+}
+.add-item-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Empty state */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--dim); gap: 12px;
+}
+.empty-title { font-size: 16px; font-weight: 600; }
+
+/* Meta panel */
+.meta-panel {
+  width: 240px; background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 12px; overflow-y: auto;
+}
+.meta-field { margin-bottom: 10px; }
+.meta-field label {
+  display: block; font-size: 9px; font-weight: 700;
+  color: var(--dim); letter-spacing: .5px; margin-bottom: 3px;
+}
+.meta-field input, .meta-field select {
+  width: 100%; padding: 5px 8px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text); font-size: 12px; outline: none; font-family: inherit;
+}
+.meta-field input:focus, .meta-field select:focus { border-color: var(--accent); }
+
+/* JSON preview */
+.json-toggle {
+  padding: 6px 12px; background: var(--surface);
+  border: 1px solid var(--border); border-top: none;
+  color: var(--dim); font-size: 10px; cursor: pointer;
+  text-align: center;
+}
+.json-panel {
+  display: none; background: var(--bg); border-top: 1px solid var(--border);
+  max-height: 300px; overflow: auto;
+}
+.json-panel.open { display: block; }
+.json-pre {
+  padding: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--dim); white-space: pre;
+}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="toolbar-title">CHECKLIST EDITOR</span>
+    <button class="tb-btn" onclick="newChecklist()">New</button>
+    <button class="tb-btn" onclick="importJSON()">Import</button>
+    <button class="tb-btn primary" onclick="exportJSON()">Export JSON</button>
+    <button class="tb-btn" onclick="copyJSON()">Copy</button>
+    <div class="tb-spacer"></div>
+    <span class="tb-hint" id="statusHint">New checklist</span>
+  </div>
+
+  <div class="main">
+    <!-- Sidebar: phases -->
+    <div class="sidebar">
+      <div class="sb-header">
+        <span class="sb-label">PHASES</span>
+        <button class="sb-add" onclick="addPhase()">+ Add</button>
+      </div>
+      <div class="phase-list" id="phaseList"></div>
+    </div>
+
+    <!-- Content: items -->
+    <div class="content" id="content">
+      <div class="empty">
+        <div class="empty-title">No phase selected</div>
+        <p>Create a phase to start adding checklist items.</p>
+      </div>
+    </div>
+
+    <!-- Meta panel -->
+    <div class="meta-panel">
+      <div class="meta-field"><label>CHECKLIST NAME</label><input id="metaName" oninput="updateMeta()" placeholder="Cessna 172S Skyhawk"></div>
+      <div class="meta-field"><label>AUTHOR</label><input id="metaAuthor" oninput="updateMeta()" placeholder="Your name"></div>
+      <div class="meta-field"><label>AIRCRAFT ID</label><input id="metaId" oninput="updateMeta()" placeholder="cessna-172"></div>
+      <div class="meta-field"><label>CATEGORY</label>
+        <select id="metaCategory" onchange="updateMeta()">
+          <option value="GA">GA</option>
+          <option value="Narrowbody">Narrowbody</option>
+          <option value="Widebody">Widebody</option>
+          <option value="Heavy">Heavy</option>
+          <option value="Turboprop">Turboprop</option>
+          <option value="Military">Military</option>
+          <option value="Helicopter">Helicopter</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="meta-field"><label>SIMULATOR</label>
+        <select id="metaSim" onchange="updateMeta()">
+          <option value="both">Both (X-Plane + MSFS)</option>
+          <option value="xplane">X-Plane only</option>
+          <option value="msfs">MSFS only</option>
+        </select>
+      </div>
+      <div class="meta-field"><label>VERSION</label><input id="metaVersion" oninput="updateMeta()" placeholder="1.0" value="1.0"></div>
+
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
+        <div class="meta-field"><label>STATS</label></div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.8" id="metaStats">
+          0 phases, 0 items
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JSON toggle -->
+  <div class="json-toggle" onclick="toggleJSON()">Show/Hide JSON Preview</div>
+  <div class="json-panel" id="jsonPanel">
+    <pre class="json-pre" id="jsonPre">{}</pre>
+  </div>
+</div>
+
+<script>
+let checklist = {
+  id: '', name: '', author: '', version: '1.0', category: 'GA', simulator: 'both', phases: []
+};
+let activePhase = -1;
+
+function render() {
+  renderPhases();
+  renderContent();
+  renderJSON();
+  renderStats();
+}
+
+function renderPhases() {
+  const el = document.getElementById('phaseList');
+  el.innerHTML = '';
+  checklist.phases.forEach((phase, i) => {
+    const div = document.createElement('div');
+    div.className = 'phase-item' + (i === activePhase ? ' active' : '');
+    div.draggable = true;
+    div.addEventListener('dragstart', e => onPhaseDragStart(e, i));
+    div.addEventListener('dragover', e => onPhaseDragOver(e, i));
+    div.addEventListener('dragleave', e => onPhaseDragLeave(e));
+    div.addEventListener('drop', e => onPhaseDrop(e, i));
+    div.addEventListener('dragend', e => onPhaseDragEnd(e));
+    div.innerHTML = `
+      <span class="phase-name">${phase.name || 'Untitled'}</span>
+      <span class="phase-count">${phase.items.length}</span>
+      <div class="phase-actions">
+        <button class="phase-act" title="Delete" onclick="event.stopPropagation(); deletePhase(${i})">&times;</button>
+      </div>
+    `;
+    div.addEventListener('click', () => { activePhase = i; render(); });
+    el.appendChild(div);
+  });
+}
+
+function renderContent() {
+  const el = document.getElementById('content');
+  if (activePhase < 0 || !checklist.phases[activePhase]) {
+    el.innerHTML = '<div class="empty"><div class="empty-title">No phase selected</div><p>Create a phase to start adding checklist items.</p></div>';
+    return;
+  }
+
+  const phase = checklist.phases[activePhase];
+  let html = `
+    <div class="content-header">
+      <input class="content-phase-input" value="${phase.name}" oninput="checklist.phases[${activePhase}].name = this.value; renderPhases(); renderJSON();" placeholder="Phase name">
+    </div>
+  `;
+
+  phase.items.forEach((item, i) => {
+    html += `
+      <div class="item-card" draggable="true" data-idx="${i}" ondragstart="onDragStart(event, ${i})" ondragover="onDragOver(event, ${i})" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${i})" ondragend="onDragEnd(event)">
+        <div class="item-row">
+          <span class="item-drag-handle" title="Drag to reorder">&#9776;</span>
+          <input class="item-input label" value="${esc(item.label)}" oninput="updateItem(${i}, 'label', this.value)" placeholder="Item label">
+          <input class="item-input expected" value="${esc(item.expected)}" oninput="updateItem(${i}, 'expected', this.value)" placeholder="Expected">
+          <button class="item-del" onclick="deleteItem(${i})">&times;</button>
+        </div>
+        <div class="item-row">
+          <span class="item-field-label">HOW TO</span>
+          <input class="item-input full" value="${esc(item.how_to || '')}" oninput="updateItem(${i}, 'how_to', this.value)" placeholder="How to perform this step...">
+        </div>
+        <div class="item-row">
+          <span class="item-field-label">LOCATION</span>
+          <input class="item-input full" value="${esc(item.location || '')}" oninput="updateItem(${i}, 'location', this.value)" placeholder="Where in the cockpit...">
+        </div>
+        <div class="item-autodetect">
+          <span class="item-field-label" style="min-width:60px">AUTO-DETECT</span>
+          <input class="item-input" style="width:60px" value="${esc(item.auto_detect?.condition || '')}" oninput="updateAutoDetect(${i}, 'condition', this.value)" placeholder="> 0">
+        </div>
+        <div class="item-autodetect" style="margin-top:2px">
+          <span class="item-field-label" style="min-width:60px;color:var(--accent)">X-PLANE</span>
+          <input class="item-input" style="flex:1" value="${esc(item.auto_detect?.xplane_dataref || '')}" oninput="updateAutoDetect(${i}, 'xplane_dataref', this.value)" placeholder="sim/cockpit/electrical/battery_on">
+        </div>
+        <div class="item-autodetect" style="margin-top:2px">
+          <span class="item-field-label" style="min-width:60px;color:var(--green)">MSFS</span>
+          <input class="item-input" style="flex:1" value="${esc(item.auto_detect?.msfs_simvar || '')}" oninput="updateAutoDetect(${i}, 'msfs_simvar', this.value)" placeholder="ELECTRICAL MASTER BATTERY">
+        </div>
+      </div>
+    `;
+  });
+
+  html += `<button class="add-item-btn" onclick="addItem()">+ Add Item</button>`;
+  el.innerHTML = html;
+}
+
+function renderJSON() {
+  const output = {
+    id: checklist.id || checklist.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    name: checklist.name,
+    author: checklist.author,
+    version: checklist.version,
+    category: checklist.category,
+    simulator: checklist.simulator,
+    phases: checklist.phases.map(p => ({
+      id: p.id || p.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      name: p.name,
+      items: p.items.map(it => {
+        const obj = { id: it.id, label: it.label, expected: it.expected };
+        if (it.how_to) obj.how_to = it.how_to;
+        if (it.location) obj.location = it.location;
+        if (it.auto_detect?.xplane_dataref || it.auto_detect?.msfs_simvar) {
+          obj.auto_detect = {
+            condition: it.auto_detect.condition || '> 0',
+            xplane_dataref: it.auto_detect.xplane_dataref || null,
+            msfs_simvar: it.auto_detect.msfs_simvar || null,
+          };
+        } else {
+          obj.auto_detect = null;
+        }
+        return obj;
+      })
+    }))
+  };
+  document.getElementById('jsonPre').textContent = JSON.stringify(output, null, 2);
+}
+
+function renderStats() {
+  const items = checklist.phases.reduce((s, p) => s + p.items.length, 0);
+  document.getElementById('metaStats').textContent = `${checklist.phases.length} phases, ${items} items`;
+}
+
+function esc(s) { return (s || '').replace(/"/g, '&quot;'); }
+
+// Phase ops
+function addPhase() {
+  checklist.phases.push({ id: '', name: 'New Phase', items: [] });
+  activePhase = checklist.phases.length - 1;
+  render();
+}
+
+function deletePhase(i) {
+  if (!confirm(`Delete "${checklist.phases[i].name}"?`)) return;
+  checklist.phases.splice(i, 1);
+  if (activePhase >= checklist.phases.length) activePhase = checklist.phases.length - 1;
+  render();
+}
+
+function movePhase(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= checklist.phases.length) return;
+  [checklist.phases[i], checklist.phases[j]] = [checklist.phases[j], checklist.phases[i]];
+  if (activePhase === i) activePhase = j;
+  else if (activePhase === j) activePhase = i;
+  render();
+}
+
+// Item ops
+function addItem() {
+  const phase = checklist.phases[activePhase];
+  phase.items.push({
+    id: `item-${Date.now()}`,
+    label: '',
+    expected: 'CHECK',
+    how_to: '',
+    location: '',
+    auto_detect: null,
+  });
+  render();
+  // Focus the new item
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.item-input.label');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  }, 50);
+}
+
+function deleteItem(i) {
+  checklist.phases[activePhase].items.splice(i, 1);
+  render();
+}
+
+function updateItem(i, field, value) {
+  checklist.phases[activePhase].items[i][field] = value;
+  if (field === 'label') {
+    checklist.phases[activePhase].items[i].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-') || `item-${i}`;
+  }
+  renderJSON();
+}
+
+function updateAutoDetect(i, field, value) {
+  const item = checklist.phases[activePhase].items[i];
+  if (!item.auto_detect) item.auto_detect = { var_name: '', var_type: 'A', condition: '> 0' };
+  item.auto_detect[field] = value;
+  renderJSON();
+}
+
+// Meta
+function updateMeta() {
+  checklist.name = document.getElementById('metaName').value;
+  checklist.author = document.getElementById('metaAuthor').value;
+  checklist.id = document.getElementById('metaId').value;
+  checklist.category = document.getElementById('metaCategory').value;
+  checklist.simulator = document.getElementById('metaSim').value;
+  checklist.version = document.getElementById('metaVersion').value;
+  document.getElementById('statusHint').textContent = checklist.name || 'New checklist';
+  renderJSON();
+}
+
+// Import/Export
+function exportJSON() {
+  renderJSON();
+  const json = document.getElementById('jsonPre').textContent;
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (checklist.id || 'checklist') + '.json';
+  a.click();
+}
+
+function copyJSON() {
+  renderJSON();
+  navigator.clipboard.writeText(document.getElementById('jsonPre').textContent);
+  document.getElementById('statusHint').textContent = 'Copied to clipboard!';
+  setTimeout(() => document.getElementById('statusHint').textContent = checklist.name || 'New checklist', 2000);
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      checklist = {
+        id: data.id || '',
+        name: data.name || '',
+        author: data.author || '',
+        version: data.version || '1.0',
+        category: data.category || 'GA',
+        phases: (data.phases || []).map(p => ({
+          id: p.id || '',
+          name: p.name || '',
+          items: (p.items || []).map(it => ({
+            id: it.id || '',
+            label: it.label || '',
+            expected: it.expected || 'CHECK',
+            how_to: it.how_to || '',
+            location: it.location || '',
+            auto_detect: it.auto_detect ? {
+              condition: it.auto_detect.condition || '> 0',
+              xplane_dataref: it.auto_detect.xplane_dataref || it.auto_detect.var_name || '',
+              msfs_simvar: it.auto_detect.msfs_simvar || it.auto_detect.var_name || '',
+            } : null,
+          }))
+        }))
+      };
+      document.getElementById('metaName').value = checklist.name;
+      document.getElementById('metaAuthor').value = checklist.author;
+      document.getElementById('metaId').value = checklist.id;
+      document.getElementById('metaCategory').value = checklist.category;
+      document.getElementById('metaVersion').value = checklist.version;
+      activePhase = checklist.phases.length > 0 ? 0 : -1;
+      document.getElementById('statusHint').textContent = `Imported: ${checklist.name}`;
+      render();
+    } catch (e) {
+      alert('Invalid JSON: ' + e.message);
+    }
+  };
+  input.click();
+}
+
+function newChecklist() {
+  if (checklist.phases.length > 0 && !confirm('Start new? Current checklist will be lost.')) return;
+  checklist = { id: '', name: '', author: '', version: '1.0', category: 'GA', phases: [] };
+  document.getElementById('metaName').value = '';
+  document.getElementById('metaAuthor').value = '';
+  document.getElementById('metaId').value = '';
+  document.getElementById('metaCategory').value = 'GA';
+  document.getElementById('metaVersion').value = '1.0';
+  activePhase = -1;
+  document.getElementById('statusHint').textContent = 'New checklist';
+  render();
+}
+
+// Drag & drop items
+let dragIdx = -1;
+
+function onDragStart(e, idx) {
+  dragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+
+function onDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (idx !== dragIdx) {
+    e.currentTarget.classList.add('drag-over');
+  }
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e, idx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (dragIdx < 0 || dragIdx === idx) return;
+  const phase = checklist.phases[activePhase];
+  const [item] = phase.items.splice(dragIdx, 1);
+  phase.items.splice(idx, 0, item);
+  dragIdx = -1;
+  render();
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  dragIdx = -1;
+}
+
+// Drag & drop phases
+function onPhaseDragStart(e, idx) {
+  dragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+
+function onPhaseDragOver(e, idx) {
+  e.preventDefault();
+  if (idx !== dragIdx) e.currentTarget.style.borderTop = '2px solid var(--accent)';
+}
+
+function onPhaseDragLeave(e) {
+  e.currentTarget.style.borderTop = '';
+}
+
+function onPhaseDrop(e, idx) {
+  e.preventDefault();
+  e.currentTarget.style.borderTop = '';
+  if (dragIdx < 0 || dragIdx === idx) return;
+  const [phase] = checklist.phases.splice(dragIdx, 1);
+  checklist.phases.splice(idx, 0, phase);
+  if (activePhase === dragIdx) activePhase = idx;
+  else if (dragIdx < activePhase && idx >= activePhase) activePhase--;
+  else if (dragIdx > activePhase && idx <= activePhase) activePhase++;
+  dragIdx = -1;
+  render();
+}
+
+function onPhaseDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  dragIdx = -1;
+}
+
+function toggleJSON() {
+  document.getElementById('jsonPanel').classList.toggle('open');
+  renderJSON();
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
