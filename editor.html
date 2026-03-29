@@ -3,24 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CockpitFlow Checklist Editor</title>
+<title>Checklist Editor — CockpitFlow</title>
+<meta name="description" content="Visual checklist editor for flight simulators. Create phases, items, auto-detect rules. Export JSON. Free.">
 <link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
 :root {
   --bg: #0a0e14; --surface: #0f1319; --surface2: #141a22;
   --border: #1e2736; --text: #b8c4d0; --dim: #4e5c6e;
   --accent: #4a9eff; --green: #34d058; --red: #ea4a5a; --amber: #e3b341;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: 'Inter', -apple-system, sans-serif; font-size: 13px;
-}
+body { font-size: 13px; }
 
-/* Layout */
-.app { display: flex; flex-direction: column; height: 100vh; }
+/* Layout — full height minus nav */
+.app { display: flex; flex-direction: column; height: calc(100vh - 49px); margin-top: 49px; }
 
 /* Toolbar */
 .toolbar {
@@ -28,9 +24,7 @@ body {
   padding: 8px 16px; background: var(--surface);
   border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
-.toolbar-brand { display: flex; align-items: center; gap: 8px; margin-right: 12px; }
-.toolbar-logo { width: 24px; height: 24px; border-radius: 4px; }
-.toolbar-title { font-size: 12px; font-weight: 600; color: var(--dim); letter-spacing: 1px; }
+.toolbar-title { font-size: 11px; font-weight: 600; color: var(--dim); letter-spacing: 1.5px; font-family: 'Orbitron', sans-serif; margin-right: 8px; }
 .tb-btn {
   padding: 6px 14px; background: var(--surface2);
   border: 1px solid var(--border); border-radius: 4px;
@@ -190,13 +184,23 @@ body {
 </head>
 <body>
 
+<nav>
+  <a href="index.html" class="nav-brand"><span class="nav-name">COCKPITFLOW</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="checklist.html">Checklist</a>
+    <a href="cockpit.html">Cockpit</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="editor.html" class="active">Editor</a>
+    <a href="download.html">Download</a>
+  </div>
+  <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
+</nav>
+
 <div class="app">
   <!-- Toolbar -->
   <div class="toolbar">
-    <a href="/" class="toolbar-brand">
-      <img src="logo.png" class="toolbar-logo" alt="">
-      <span class="toolbar-title">CHECKLIST EDITOR</span>
-    </a>
+    <span class="toolbar-title">CHECKLIST EDITOR</span>
     <button class="tb-btn" onclick="newChecklist()">New</button>
     <button class="tb-btn" onclick="importJSON()">Import</button>
     <button class="tb-btn primary" onclick="exportJSON()">Export JSON</button>
