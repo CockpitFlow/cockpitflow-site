@@ -4,66 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editors — CockpitFlow</title>
-<meta name="description" content="Visual editors for creating flight sim presets. Checklists, cockpit layouts, hardware profiles.">
 <link rel="stylesheet" href="style.css">
 <style>
-.editor-page { padding-top: 49px; }
-
-/* Hub view */
-.hub { padding: 60px 20px; }
-.hub-title {
-  font-family: 'Orbitron'; font-size: 28px; font-weight: 700;
-  color: #fff; text-align: center; margin-bottom: 8px;
-}
-.hub-desc {
-  text-align: center; color: var(--dim); font-size: 15px;
-  max-width: 500px; margin: 0 auto 40px;
-}
+.hub { padding: 80px 20px 60px; }
 .hub-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px; max-width: 900px; margin: 0 auto;
 }
 .hub-card {
-  padding: 28px; background: var(--surface);
+  display: block; padding: 28px; background: var(--surface);
   border: 1px solid var(--border); border-radius: 10px;
-  cursor: pointer; transition: all .15s;
-  display: flex; flex-direction: column; gap: 10px;
+  text-decoration: none; color: inherit; transition: all .15s;
 }
 .hub-card:hover { border-color: rgba(74,158,255,.3); }
-.hub-card-icon { font-size: 36px; }
-.hub-card h3 { font-size: 16px; color: #fff; }
-.hub-card p { font-size: 13px; color: var(--dim); line-height: 1.5; flex: 1; }
-.hub-card-status {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px;
-  font-weight: 600; letter-spacing: .5px;
-}
-.hub-card-status.ready { color: var(--green); }
-.hub-card-status.soon { color: var(--dim); }
-
-/* Editor frame */
-.editor-frame {
-  display: none; position: fixed;
-  top: 49px; left: 0; right: 0; bottom: 0;
-  flex-direction: column;
-}
-.editor-frame.active { display: flex; }
-.editor-bar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 6px 16px; background: var(--surface);
-  border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-.editor-back {
-  padding: 4px 12px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 4px;
-  color: var(--dim); font-size: 12px; cursor: pointer;
-  font-family: inherit;
-}
-.editor-back:hover { border-color: var(--accent); color: var(--accent); }
-.editor-name {
-  font-family: 'Orbitron'; font-size: 10px; color: var(--dim);
-  letter-spacing: 2px;
-}
-.editor-iframe { flex: 1; border: none; background: var(--bg); }
+.hub-card-icon { font-size: 36px; margin-bottom: 10px; }
+.hub-card h3 { font-size: 16px; color: #fff; margin-bottom: 6px; }
+.hub-card p { font-size: 13px; color: var(--dim); line-height: 1.5; margin-bottom: 10px; }
+.hub-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: .5px; }
+.hub-badge.ready { color: var(--green); }
+.hub-badge.soon { color: var(--dim); }
 </style>
 </head>
 <body>
@@ -81,73 +40,35 @@
   <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
 </nav>
 
-<div class="editor-page">
-  <!-- Hub: editor selection -->
-  <div class="hub" id="hub">
-    <h1 class="hub-title">EDITORS</h1>
-    <p class="hub-desc">Create presets for any aircraft. Visual editors that export clean JSON files ready to share.</p>
-
-    <div class="hub-grid">
-      <div class="hub-card" onclick="openEditor('checklist')">
-        <div class="hub-card-icon">&#9745;</div>
-        <h3>Checklist Editor</h3>
-        <p>Create aircraft checklists. Add phases, items, auto-detect rules for X-Plane and MSFS. Drag to reorder. Export JSON.</p>
-        <span class="hub-card-status ready">READY</span>
-      </div>
-
-      <div class="hub-card" onclick="openEditor('cockpit')">
-        <div class="hub-card-icon">&#9992;</div>
-        <h3>Cockpit Layout Editor</h3>
-        <p>Design touch cockpit layouts. Place levers, yoke, gauges, switches on a grid. Set commands and properties.</p>
-        <span class="hub-card-status soon">COMING SOON</span>
-      </div>
-
-      <div class="hub-card" onclick="openEditor('hardware')">
-        <div class="hub-card-icon">&#128268;</div>
-        <h3>Hardware Profile Editor</h3>
-        <p>Define pin mappings for Arduino and ESP32. Buttons, encoders, potentiometers, LEDs. Map to sim functions.</p>
-        <span class="hub-card-status soon">COMING SOON</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Editor iframe container -->
-  <div class="editor-frame" id="editorFrame">
-    <div class="editor-bar">
-      <button class="editor-back" onclick="closeEditor()">&#9664; Back to Editors</button>
-      <span class="editor-name" id="editorName"></span>
-    </div>
-    <iframe class="editor-iframe" id="editorIframe" src="about:blank"></iframe>
-  </div>
+<div class="page-hero">
+  <h1>EDITORS</h1>
+  <p>Create presets for any aircraft. Visual editors that export clean JSON files ready to use and share.</p>
 </div>
 
-<script>
-const editors = {
-  checklist: { name: 'CHECKLIST EDITOR', src: 'checklist-editor.html' },
-  cockpit: { name: 'COCKPIT LAYOUT EDITOR', src: null },
-  hardware: { name: 'HARDWARE PROFILE EDITOR', src: null },
-};
+<section class="hub">
+  <div class="hub-grid">
+    <a href="checklist-editor.html" class="hub-card">
+      <div class="hub-card-icon">&#9745;</div>
+      <h3>Checklist Editor</h3>
+      <p>Create aircraft checklists with phases, items, auto-detect rules for X-Plane and MSFS. Drag to reorder. Export JSON.</p>
+      <span class="hub-badge ready">OPEN EDITOR &rarr;</span>
+    </a>
+    <div class="hub-card" style="cursor:default;">
+      <div class="hub-card-icon">&#9992;</div>
+      <h3>Cockpit Layout Editor</h3>
+      <p>Design touch cockpit layouts. Place levers, yoke, gauges, switches on a grid. Set commands and properties.</p>
+      <span class="hub-badge soon">COMING SOON</span>
+    </div>
+    <div class="hub-card" style="cursor:default;">
+      <div class="hub-card-icon">&#128268;</div>
+      <h3>Hardware Profile Editor</h3>
+      <p>Define pin mappings for Arduino and ESP32. Buttons, encoders, potentiometers, LEDs. Map to sim functions.</p>
+      <span class="hub-badge soon">COMING SOON</span>
+    </div>
+  </div>
+</section>
 
-function openEditor(id) {
-  const editor = editors[id];
-  if (!editor || !editor.src) return;
-  document.getElementById('hub').style.display = 'none';
-  document.getElementById('editorFrame').classList.add('active');
-  document.getElementById('editorName').textContent = editor.name;
-  document.getElementById('editorIframe').src = editor.src;
-}
-
-function closeEditor() {
-  document.getElementById('hub').style.display = '';
-  document.getElementById('editorFrame').classList.remove('active');
-  document.getElementById('editorIframe').src = 'about:blank';
-}
-
-// Auto-open if ?editor= param
-const params = new URLSearchParams(window.location.search);
-const autoOpen = params.get('open');
-if (autoOpen && editors[autoOpen]?.src) openEditor(autoOpen);
-</script>
+<footer><p>CockpitFlow — <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p></footer>
 
 </body>
 </html>

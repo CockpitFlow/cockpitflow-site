@@ -4,613 +4,157 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checklist Editor — CockpitFlow</title>
-<meta name="description" content="Visual checklist editor for flight simulators. Create phases, items, auto-detect rules. Export JSON. Free.">
-
+<link rel="stylesheet" href="style.css">
 <style>
-:root {
-  --bg: #0a0e14; --surface: #0f1319; --surface2: #141a22;
-  --border: #1e2736; --text: #b8c4d0; --dim: #4e5c6e;
-  --accent: #4a9eff; --green: #34d058; --red: #ea4a5a; --amber: #e3b341;
-}
-body { font-size: 13px; }
-
-/* Layout — full height minus nav */
-.app { display: flex; flex-direction: column; height: 100vh; }
-
-/* Toolbar */
-.toolbar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 16px; background: var(--surface);
-  border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-.toolbar-title { font-size: 11px; font-weight: 600; color: var(--dim); letter-spacing: 1.5px; font-family: 'Orbitron', sans-serif; margin-right: 8px; }
-.tb-btn {
-  padding: 6px 14px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 4px;
-  color: var(--dim); font-size: 11px; font-weight: 600;
-  cursor: pointer; font-family: inherit;
-}
-.tb-btn:hover { border-color: var(--dim); color: var(--text); }
-.tb-btn.primary { background: rgba(74,158,255,.1); border-color: rgba(74,158,255,.3); color: var(--accent); }
-.tb-input {
-  padding: 6px 10px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 4px;
-  color: var(--text); font-size: 12px; outline: none; width: 200px;
-}
-.tb-input:focus { border-color: var(--accent); }
-.tb-spacer { flex: 1; }
-.tb-hint { font-size: 10px; color: var(--dim); }
-
-/* Main */
-.main { display: flex; flex: 1; overflow: hidden; }
-
-/* Sidebar: phases */
-.sidebar {
-  width: 220px; background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden;
-}
-.sb-header {
-  padding: 10px 12px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sb-label { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1px; }
-.sb-add {
-  padding: 2px 8px; background: none; border: 1px solid var(--border);
-  border-radius: 3px; color: var(--dim); font-size: 11px; cursor: pointer;
-}
-.sb-add:hover { border-color: var(--accent); color: var(--accent); }
-.phase-list { flex: 1; overflow-y: auto; padding: 4px; }
-.phase-item {
-  padding: 8px 10px; border-radius: 4px; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 2px; transition: background .1s;
-}
-.phase-item:hover { background: var(--surface2); }
-.phase-item.active { background: rgba(74,158,255,.08); }
-.phase-name { font-size: 12px; font-weight: 500; }
-.phase-count { font-size: 10px; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
-.phase-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .1s; }
-.phase-item:hover .phase-actions { opacity: 1; }
-.phase-act {
-  padding: 1px 4px; background: none; border: none;
-  color: var(--dim); font-size: 10px; cursor: pointer;
-}
-.phase-act:hover { color: var(--red); }
-
-/* Content: items */
-.content { flex: 1; overflow-y: auto; padding: 16px; }
-.content-header {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-}
-.content-phase-name {
-  font-size: 18px; font-weight: 700; color: #fff; flex: 1;
-}
-.content-phase-input {
-  font-size: 18px; font-weight: 700; color: #fff;
-  background: none; border: none; border-bottom: 2px solid var(--accent);
-  outline: none; flex: 1; font-family: inherit; padding: 2px 0;
-}
-
-.item-card {
-  padding: 12px 14px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 6px;
-  margin-bottom: 6px; transition: all .15s;
-  cursor: default;
-}
-.item-card:hover { border-color: rgba(74,158,255,.15); }
-.item-card.dragging { opacity: .3; }
-.item-card.drag-over { border-color: var(--accent); border-style: dashed; }
-.item-drag-handle {
-  cursor: grab; color: var(--dim); font-size: 14px; padding: 2px 4px;
-  user-select: none; opacity: .4; transition: opacity .1s;
-}
-.item-drag-handle:hover { opacity: 1; }
-.item-drag-handle:active { cursor: grabbing; }
-.item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
-.item-input {
-  padding: 5px 8px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 3px;
-  color: var(--text); font-size: 12px; outline: none;
-  font-family: inherit;
-}
-.item-input:focus { border-color: var(--accent); }
-.item-input.label { flex: 1; font-weight: 600; }
-.item-input.expected { width: 100px; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
-.item-input.full { flex: 1; }
-.item-field-label { font-size: 9px; color: var(--dim); font-weight: 600; letter-spacing: .5px; }
-.item-del {
-  padding: 4px 8px; background: none; border: 1px solid var(--border);
-  border-radius: 3px; color: var(--dim); font-size: 10px; cursor: pointer;
-}
-.item-del:hover { border-color: var(--red); color: var(--red); }
-.item-autodetect {
-  display: flex; gap: 6px; align-items: center;
-  padding: 6px 8px; background: var(--bg); border-radius: 4px;
-  margin-top: 4px;
-}
-.item-autodetect .item-input { font-size: 11px; background: var(--surface); }
-
-.add-item-btn {
-  padding: 10px; background: none; border: 2px dashed var(--border);
-  border-radius: 6px; color: var(--dim); font-size: 12px; font-weight: 600;
-  cursor: pointer; width: 100%; text-align: center; margin-top: 8px;
-}
-.add-item-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* Empty state */
-.empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 100%; color: var(--dim); gap: 12px;
-}
-.empty-title { font-size: 16px; font-weight: 600; }
-
-/* Meta panel */
-.meta-panel {
-  width: 240px; background: var(--surface);
-  border-left: 1px solid var(--border);
-  padding: 12px; overflow-y: auto;
-}
-.meta-field { margin-bottom: 10px; }
-.meta-field label {
-  display: block; font-size: 9px; font-weight: 700;
-  color: var(--dim); letter-spacing: .5px; margin-bottom: 3px;
-}
-.meta-field input, .meta-field select {
-  width: 100%; padding: 5px 8px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 3px;
-  color: var(--text); font-size: 12px; outline: none; font-family: inherit;
-}
-.meta-field input:focus, .meta-field select:focus { border-color: var(--accent); }
-
-/* JSON preview */
-.json-toggle {
-  padding: 6px 12px; background: var(--surface);
-  border: 1px solid var(--border); border-top: none;
-  color: var(--dim); font-size: 10px; cursor: pointer;
-  text-align: center;
-}
-.json-panel {
-  display: none; background: var(--bg); border-top: 1px solid var(--border);
-  max-height: 300px; overflow: auto;
-}
-.json-panel.open { display: block; }
-.json-pre {
-  padding: 12px; font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; color: var(--dim); white-space: pre;
-}
+.ed-page { padding-top: 70px; padding-bottom: 60px; }
+.ed-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:14px 0; margin-bottom:20px; border-bottom:1px solid var(--border); }
+.ed-btn { padding:8px 16px; background:var(--surface); border:1px solid var(--border); border-radius:5px; color:var(--dim); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+.ed-btn:hover { border-color:var(--dim); color:var(--text); }
+.ed-btn.primary { background:rgba(74,158,255,.08); border-color:rgba(74,158,255,.3); color:var(--accent); }
+.ed-spacer { flex:1; }
+.ed-status { font-size:11px; color:var(--dim); }
+.ed-layout { display:flex; gap:20px; align-items:flex-start; }
+.ed-main { flex:1; min-width:0; }
+.ed-side { width:260px; flex-shrink:0; position:sticky; top:70px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; }
+.ed-field { margin-bottom:10px; }
+.ed-field label { display:block; font-size:10px; font-weight:700; color:var(--dim); letter-spacing:.5px; margin-bottom:3px; }
+.ed-field input,.ed-field select { width:100%; padding:7px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:13px; outline:none; font-family:inherit; }
+.ed-field input:focus,.ed-field select:focus { border-color:var(--accent); }
+.ed-phase { background:var(--surface); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; overflow:hidden; }
+.ed-phase-header { display:flex; align-items:center; gap:8px; padding:12px 14px; background:var(--surface2); border-bottom:1px solid var(--border); }
+.ed-phase-name { flex:1; background:none; border:none; border-bottom:1px solid transparent; color:#fff; font-size:14px; font-weight:600; outline:none; font-family:inherit; padding:2px 0; }
+.ed-phase-name:focus { border-bottom-color:var(--accent); }
+.ed-phase-count { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); }
+.ed-phase-del { padding:2px 8px; background:none; border:1px solid var(--border); border-radius:3px; color:var(--dim); font-size:11px; cursor:pointer; }
+.ed-phase-del:hover { border-color:var(--red); color:var(--red); }
+.ed-phase-body { padding:8px; }
+.ed-item { padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; margin-bottom:6px; }
+.ed-item-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.ed-inp { padding:6px 10px; background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:13px; outline:none; font-family:inherit; }
+.ed-inp:focus { border-color:var(--accent); }
+.ed-inp.label { flex:1; font-weight:600; }
+.ed-inp.expected { width:110px; font-family:'JetBrains Mono',monospace; color:var(--accent); }
+.ed-inp.full { flex:1; }
+.ed-fld { font-size:9px; font-weight:700; color:var(--dim); letter-spacing:.5px; min-width:55px; }
+.ed-del { padding:4px 10px; background:none; border:1px solid var(--border); border-radius:3px; color:var(--dim); font-size:11px; cursor:pointer; }
+.ed-del:hover { border-color:var(--red); color:var(--red); }
+.ed-ad { display:flex; flex-direction:column; gap:4px; padding:8px 10px; background:var(--surface); border-radius:5px; margin-top:6px; }
+.ed-ad-row { display:flex; gap:6px; align-items:center; }
+.ed-ad-lbl { font-size:9px; font-weight:700; letter-spacing:.5px; min-width:60px; }
+.ed-ad-lbl.xp { color:var(--accent); }
+.ed-ad-lbl.ms { color:var(--green); }
+.ed-ad-lbl.co { color:var(--amber); }
+.ed-ad-inp { flex:1; padding:5px 8px; background:var(--bg); border:1px solid var(--border); border-radius:3px; color:var(--text); font-size:12px; font-family:'JetBrains Mono',monospace; outline:none; }
+.ed-ad-inp:focus { border-color:var(--accent); }
+.ed-ad-inp.co { width:70px; flex:none; }
+.ed-add { padding:10px; background:none; border:2px dashed var(--border); border-radius:6px; color:var(--dim); font-size:12px; font-weight:600; cursor:pointer; width:100%; text-align:center; font-family:inherit; }
+.ed-add:hover { border-color:var(--accent); color:var(--accent); }
+.ed-add-phase { padding:14px; border-radius:8px; font-size:13px; margin-top:8px; }
+.ed-json { margin-top:30px; background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.ed-json-hdr { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--surface2); cursor:pointer; }
+.ed-json-hdr span { font-size:11px; font-weight:600; color:var(--dim); letter-spacing:.5px; }
+.ed-json-body { display:none; padding:14px; max-height:400px; overflow:auto; }
+.ed-json-body.open { display:block; }
+.ed-json-body pre { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); line-height:1.6; white-space:pre; }
+.ed-stats { font-size:12px; color:var(--dim); line-height:1.8; border-top:1px solid var(--border); padding-top:12px; margin-top:12px; }
+.ed-stats strong { color:var(--text); }
+@media (max-width:800px) { .ed-layout { flex-direction:column-reverse; } .ed-side { width:100%; position:static; } }
 </style>
 </head>
 <body>
 
-
-<div class="app">
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <span class="toolbar-title">CHECKLIST EDITOR</span>
-    <button class="tb-btn" onclick="newChecklist()">New</button>
-    <button class="tb-btn" onclick="importJSON()">Import</button>
-    <button class="tb-btn primary" onclick="exportJSON()">Export JSON</button>
-    <button class="tb-btn" onclick="copyJSON()">Copy</button>
-    <div class="tb-spacer"></div>
-    <span class="tb-hint" id="statusHint">New checklist</span>
+<nav>
+  <a href="index.html" class="nav-brand"><span class="nav-name">COCKPITFLOW</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="checklist.html">Checklist</a>
+    <a href="cockpit.html">Cockpit</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="editor.html" class="active">Editor</a>
+    <a href="download.html">Download</a>
   </div>
+  <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
+</nav>
 
-  <div class="main">
-    <!-- Sidebar: phases -->
-    <div class="sidebar">
-      <div class="sb-header">
-        <span class="sb-label">PHASES</span>
-        <button class="sb-add" onclick="addPhase()">+ Add</button>
-      </div>
-      <div class="phase-list" id="phaseList"></div>
+<div class="ed-page">
+  <div class="container">
+    <div class="ed-toolbar">
+      <button class="ed-btn" onclick="fresh()">New</button>
+      <button class="ed-btn" onclick="importJSON()">Import</button>
+      <button class="ed-btn primary" onclick="exportJSON()">Export JSON</button>
+      <button class="ed-btn" onclick="copyJSON()">Copy</button>
+      <div class="ed-spacer"></div>
+      <span class="ed-status" id="st">New checklist</span>
     </div>
-
-    <!-- Content: items -->
-    <div class="content" id="content">
-      <div class="empty">
-        <div class="empty-title">No phase selected</div>
-        <p>Create a phase to start adding checklist items.</p>
-      </div>
-    </div>
-
-    <!-- Meta panel -->
-    <div class="meta-panel">
-      <div class="meta-field"><label>CHECKLIST NAME</label><input id="metaName" oninput="updateMeta()" placeholder="Cessna 172S Skyhawk"></div>
-      <div class="meta-field"><label>AUTHOR</label><input id="metaAuthor" oninput="updateMeta()" placeholder="Your name"></div>
-      <div class="meta-field"><label>AIRCRAFT ID</label><input id="metaId" oninput="updateMeta()" placeholder="cessna-172"></div>
-      <div class="meta-field"><label>CATEGORY</label>
-        <select id="metaCategory" onchange="updateMeta()">
-          <option value="GA">GA</option>
-          <option value="Narrowbody">Narrowbody</option>
-          <option value="Widebody">Widebody</option>
-          <option value="Heavy">Heavy</option>
-          <option value="Turboprop">Turboprop</option>
-          <option value="Military">Military</option>
-          <option value="Helicopter">Helicopter</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="meta-field"><label>SIMULATOR</label>
-        <select id="metaSim" onchange="updateMeta()">
-          <option value="both">Both (X-Plane + MSFS)</option>
-          <option value="xplane">X-Plane only</option>
-          <option value="msfs">MSFS only</option>
-        </select>
-      </div>
-      <div class="meta-field"><label>VERSION</label><input id="metaVersion" oninput="updateMeta()" placeholder="1.0" value="1.0"></div>
-
-      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
-        <div class="meta-field"><label>STATS</label></div>
-        <div style="font-size:11px;color:var(--dim);line-height:1.8" id="metaStats">
-          0 phases, 0 items
-        </div>
+    <div class="ed-layout">
+      <div class="ed-main" id="main"></div>
+      <div class="ed-side">
+        <div class="ed-field"><label>NAME</label><input id="mName" oninput="meta()" placeholder="Cessna 172S Skyhawk"></div>
+        <div class="ed-field"><label>AUTHOR</label><input id="mAuthor" oninput="meta()" placeholder="Your name"></div>
+        <div class="ed-field"><label>ID</label><input id="mId" oninput="meta()" placeholder="cessna-172"></div>
+        <div class="ed-field"><label>CATEGORY</label><select id="mCat" onchange="meta()"><option>GA</option><option>Narrowbody</option><option>Widebody</option><option>Heavy</option><option>Turboprop</option><option>Military</option><option>Helicopter</option></select></div>
+        <div class="ed-field"><label>SIMULATOR</label><select id="mSim" onchange="meta()"><option value="both">Both</option><option value="xplane">X-Plane</option><option value="msfs">MSFS</option></select></div>
+        <div class="ed-field"><label>VERSION</label><input id="mVer" oninput="meta()" value="1.0"></div>
+        <div class="ed-stats" id="stats">0 phases, 0 items</div>
       </div>
     </div>
-  </div>
-
-  <!-- JSON toggle -->
-  <div class="json-toggle" onclick="toggleJSON()">Show/Hide JSON Preview</div>
-  <div class="json-panel" id="jsonPanel">
-    <pre class="json-pre" id="jsonPre">{}</pre>
+    <div class="ed-json">
+      <div class="ed-json-hdr" onclick="document.getElementById('jb').classList.toggle('open')"><span>JSON PREVIEW</span><span>&#9660;</span></div>
+      <div class="ed-json-body" id="jb"><pre id="jp">{}</pre></div>
+    </div>
   </div>
 </div>
 
+<footer><p>CockpitFlow — <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p></footer>
+
 <script>
-let checklist = {
-  id: '', name: '', author: '', version: '1.0', category: 'GA', simulator: 'both', phases: []
-};
-let activePhase = -1;
-
-function render() {
-  renderPhases();
-  renderContent();
-  renderJSON();
-  renderStats();
-}
-
-function renderPhases() {
-  const el = document.getElementById('phaseList');
-  el.innerHTML = '';
-  checklist.phases.forEach((phase, i) => {
-    const div = document.createElement('div');
-    div.className = 'phase-item' + (i === activePhase ? ' active' : '');
-    div.draggable = true;
-    div.addEventListener('dragstart', e => onPhaseDragStart(e, i));
-    div.addEventListener('dragover', e => onPhaseDragOver(e, i));
-    div.addEventListener('dragleave', e => onPhaseDragLeave(e));
-    div.addEventListener('drop', e => onPhaseDrop(e, i));
-    div.addEventListener('dragend', e => onPhaseDragEnd(e));
-    div.innerHTML = `
-      <span class="phase-name">${phase.name || 'Untitled'}</span>
-      <span class="phase-count">${phase.items.length}</span>
-      <div class="phase-actions">
-        <button class="phase-act" title="Delete" onclick="event.stopPropagation(); deletePhase(${i})">&times;</button>
-      </div>
-    `;
-    div.addEventListener('click', () => { activePhase = i; render(); });
-    el.appendChild(div);
+let C={id:'',name:'',author:'',version:'1.0',category:'GA',simulator:'both',phases:[]};
+function esc(s){return(s||'').replace(/"/g,'&quot;')}
+function render(){
+  let h='';
+  C.phases.forEach((p,pi)=>{
+    h+=`<div class="ed-phase"><div class="ed-phase-header">
+      <input class="ed-phase-name" value="${esc(p.name)}" oninput="C.phases[${pi}].name=this.value;json()">
+      <span class="ed-phase-count">${p.items.length}</span>
+      <button class="ed-phase-del" onclick="if(confirm('Delete?')){C.phases.splice(${pi},1);render()}">&#10005;</button>
+    </div><div class="ed-phase-body">`;
+    p.items.forEach((it,ii)=>{
+      h+=`<div class="ed-item">
+        <div class="ed-item-row">
+          <input class="ed-inp label" value="${esc(it.label)}" oninput="C.phases[${pi}].items[${ii}].label=this.value;json()">
+          <input class="ed-inp expected" value="${esc(it.expected)}" oninput="C.phases[${pi}].items[${ii}].expected=this.value;json()">
+          <button class="ed-del" onclick="C.phases[${pi}].items.splice(${ii},1);render()">&#10005;</button>
+        </div>
+        <div class="ed-item-row"><span class="ed-fld">HOW TO</span><input class="ed-inp full" value="${esc(it.how_to)}" oninput="C.phases[${pi}].items[${ii}].how_to=this.value;json()"></div>
+        <div class="ed-item-row"><span class="ed-fld">LOCATION</span><input class="ed-inp full" value="${esc(it.location)}" oninput="C.phases[${pi}].items[${ii}].location=this.value;json()"></div>
+        <div class="ed-ad">
+          <div class="ed-ad-row"><span class="ed-ad-lbl co">CONDITION</span><input class="ed-ad-inp co" value="${esc(it.auto_detect?.condition)}" oninput="ad(${pi},${ii},'condition',this.value)"></div>
+          <div class="ed-ad-row"><span class="ed-ad-lbl xp">X-PLANE</span><input class="ed-ad-inp" value="${esc(it.auto_detect?.xplane_dataref)}" oninput="ad(${pi},${ii},'xplane_dataref',this.value)" placeholder="sim/cockpit/..."></div>
+          <div class="ed-ad-row"><span class="ed-ad-lbl ms">MSFS</span><input class="ed-ad-inp" value="${esc(it.auto_detect?.msfs_simvar)}" oninput="ad(${pi},${ii},'msfs_simvar',this.value)" placeholder="ELECTRICAL MASTER..."></div>
+        </div>
+      </div>`;
+    });
+    h+=`<button class="ed-add" onclick="C.phases[${pi}].items.push({id:'i'+Date.now(),label:'',expected:'CHECK',how_to:'',location:'',auto_detect:null});render()">+ Add Item</button></div></div>`;
   });
+  h+=`<button class="ed-add ed-add-phase" onclick="C.phases.push({id:'',name:'New Phase',items:[]});render()">+ Add Phase</button>`;
+  document.getElementById('main').innerHTML=h;
+  json();
+  const items=C.phases.reduce((s,p)=>s+p.items.length,0);
+  document.getElementById('stats').innerHTML=`<strong>${C.phases.length}</strong> phases, <strong>${items}</strong> items`;
 }
-
-function renderContent() {
-  const el = document.getElementById('content');
-  if (activePhase < 0 || !checklist.phases[activePhase]) {
-    el.innerHTML = '<div class="empty"><div class="empty-title">No phase selected</div><p>Create a phase to start adding checklist items.</p></div>';
-    return;
-  }
-
-  const phase = checklist.phases[activePhase];
-  let html = `
-    <div class="content-header">
-      <input class="content-phase-input" value="${phase.name}" oninput="checklist.phases[${activePhase}].name = this.value; renderPhases(); renderJSON();" placeholder="Phase name">
-    </div>
-  `;
-
-  phase.items.forEach((item, i) => {
-    html += `
-      <div class="item-card" draggable="true" data-idx="${i}" ondragstart="onDragStart(event, ${i})" ondragover="onDragOver(event, ${i})" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${i})" ondragend="onDragEnd(event)">
-        <div class="item-row">
-          <span class="item-drag-handle" title="Drag to reorder">&#9776;</span>
-          <input class="item-input label" value="${esc(item.label)}" oninput="updateItem(${i}, 'label', this.value)" placeholder="Item label">
-          <input class="item-input expected" value="${esc(item.expected)}" oninput="updateItem(${i}, 'expected', this.value)" placeholder="Expected">
-          <button class="item-del" onclick="deleteItem(${i})">&times;</button>
-        </div>
-        <div class="item-row">
-          <span class="item-field-label">HOW TO</span>
-          <input class="item-input full" value="${esc(item.how_to || '')}" oninput="updateItem(${i}, 'how_to', this.value)" placeholder="How to perform this step...">
-        </div>
-        <div class="item-row">
-          <span class="item-field-label">LOCATION</span>
-          <input class="item-input full" value="${esc(item.location || '')}" oninput="updateItem(${i}, 'location', this.value)" placeholder="Where in the cockpit...">
-        </div>
-        <div class="item-autodetect">
-          <span class="item-field-label" style="min-width:60px">AUTO-DETECT</span>
-          <input class="item-input" style="width:60px" value="${esc(item.auto_detect?.condition || '')}" oninput="updateAutoDetect(${i}, 'condition', this.value)" placeholder="> 0">
-        </div>
-        <div class="item-autodetect" style="margin-top:2px">
-          <span class="item-field-label" style="min-width:60px;color:var(--accent)">X-PLANE</span>
-          <input class="item-input" style="flex:1" value="${esc(item.auto_detect?.xplane_dataref || '')}" oninput="updateAutoDetect(${i}, 'xplane_dataref', this.value)" placeholder="sim/cockpit/electrical/battery_on">
-        </div>
-        <div class="item-autodetect" style="margin-top:2px">
-          <span class="item-field-label" style="min-width:60px;color:var(--green)">MSFS</span>
-          <input class="item-input" style="flex:1" value="${esc(item.auto_detect?.msfs_simvar || '')}" oninput="updateAutoDetect(${i}, 'msfs_simvar', this.value)" placeholder="ELECTRICAL MASTER BATTERY">
-        </div>
-      </div>
-    `;
-  });
-
-  html += `<button class="add-item-btn" onclick="addItem()">+ Add Item</button>`;
-  el.innerHTML = html;
+function ad(pi,ii,f,v){const it=C.phases[pi].items[ii];if(!it.auto_detect)it.auto_detect={condition:'> 0',xplane_dataref:'',msfs_simvar:''};it.auto_detect[f]=v;json()}
+function meta(){C.name=document.getElementById('mName').value;C.author=document.getElementById('mAuthor').value;C.id=document.getElementById('mId').value;C.category=document.getElementById('mCat').value;C.simulator=document.getElementById('mSim').value;C.version=document.getElementById('mVer').value;document.getElementById('st').textContent=C.name||'New checklist';json()}
+function json(){
+  const o={id:C.id||C.name.toLowerCase().replace(/[^a-z0-9]/g,'-'),name:C.name,author:C.author,version:C.version,category:C.category,simulator:C.simulator,
+    phases:C.phases.map(p=>({id:p.id||p.name.toLowerCase().replace(/[^a-z0-9]/g,'-'),name:p.name,
+      items:p.items.map(it=>{const r={id:it.id,label:it.label,expected:it.expected};if(it.how_to)r.how_to=it.how_to;if(it.location)r.location=it.location;
+        if(it.auto_detect?.xplane_dataref||it.auto_detect?.msfs_simvar)r.auto_detect={condition:it.auto_detect.condition||'> 0',xplane_dataref:it.auto_detect.xplane_dataref||null,msfs_simvar:it.auto_detect.msfs_simvar||null};else r.auto_detect=null;return r})}))};
+  document.getElementById('jp').textContent=JSON.stringify(o,null,2);
 }
-
-function renderJSON() {
-  const output = {
-    id: checklist.id || checklist.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-    name: checklist.name,
-    author: checklist.author,
-    version: checklist.version,
-    category: checklist.category,
-    simulator: checklist.simulator,
-    phases: checklist.phases.map(p => ({
-      id: p.id || p.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      name: p.name,
-      items: p.items.map(it => {
-        const obj = { id: it.id, label: it.label, expected: it.expected };
-        if (it.how_to) obj.how_to = it.how_to;
-        if (it.location) obj.location = it.location;
-        if (it.auto_detect?.xplane_dataref || it.auto_detect?.msfs_simvar) {
-          obj.auto_detect = {
-            condition: it.auto_detect.condition || '> 0',
-            xplane_dataref: it.auto_detect.xplane_dataref || null,
-            msfs_simvar: it.auto_detect.msfs_simvar || null,
-          };
-        } else {
-          obj.auto_detect = null;
-        }
-        return obj;
-      })
-    }))
-  };
-  document.getElementById('jsonPre').textContent = JSON.stringify(output, null, 2);
-}
-
-function renderStats() {
-  const items = checklist.phases.reduce((s, p) => s + p.items.length, 0);
-  document.getElementById('metaStats').textContent = `${checklist.phases.length} phases, ${items} items`;
-}
-
-function esc(s) { return (s || '').replace(/"/g, '&quot;'); }
-
-// Phase ops
-function addPhase() {
-  checklist.phases.push({ id: '', name: 'New Phase', items: [] });
-  activePhase = checklist.phases.length - 1;
-  render();
-}
-
-function deletePhase(i) {
-  if (!confirm(`Delete "${checklist.phases[i].name}"?`)) return;
-  checklist.phases.splice(i, 1);
-  if (activePhase >= checklist.phases.length) activePhase = checklist.phases.length - 1;
-  render();
-}
-
-function movePhase(i, dir) {
-  const j = i + dir;
-  if (j < 0 || j >= checklist.phases.length) return;
-  [checklist.phases[i], checklist.phases[j]] = [checklist.phases[j], checklist.phases[i]];
-  if (activePhase === i) activePhase = j;
-  else if (activePhase === j) activePhase = i;
-  render();
-}
-
-// Item ops
-function addItem() {
-  const phase = checklist.phases[activePhase];
-  phase.items.push({
-    id: `item-${Date.now()}`,
-    label: '',
-    expected: 'CHECK',
-    how_to: '',
-    location: '',
-    auto_detect: null,
-  });
-  render();
-  // Focus the new item
-  setTimeout(() => {
-    const inputs = document.querySelectorAll('.item-input.label');
-    if (inputs.length) inputs[inputs.length - 1].focus();
-  }, 50);
-}
-
-function deleteItem(i) {
-  checklist.phases[activePhase].items.splice(i, 1);
-  render();
-}
-
-function updateItem(i, field, value) {
-  checklist.phases[activePhase].items[i][field] = value;
-  if (field === 'label') {
-    checklist.phases[activePhase].items[i].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-') || `item-${i}`;
-  }
-  renderJSON();
-}
-
-function updateAutoDetect(i, field, value) {
-  const item = checklist.phases[activePhase].items[i];
-  if (!item.auto_detect) item.auto_detect = { var_name: '', var_type: 'A', condition: '> 0' };
-  item.auto_detect[field] = value;
-  renderJSON();
-}
-
-// Meta
-function updateMeta() {
-  checklist.name = document.getElementById('metaName').value;
-  checklist.author = document.getElementById('metaAuthor').value;
-  checklist.id = document.getElementById('metaId').value;
-  checklist.category = document.getElementById('metaCategory').value;
-  checklist.simulator = document.getElementById('metaSim').value;
-  checklist.version = document.getElementById('metaVersion').value;
-  document.getElementById('statusHint').textContent = checklist.name || 'New checklist';
-  renderJSON();
-}
-
-// Import/Export
-function exportJSON() {
-  renderJSON();
-  const json = document.getElementById('jsonPre').textContent;
-  const blob = new Blob([json], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (checklist.id || 'checklist') + '.json';
-  a.click();
-}
-
-function copyJSON() {
-  renderJSON();
-  navigator.clipboard.writeText(document.getElementById('jsonPre').textContent);
-  document.getElementById('statusHint').textContent = 'Copied to clipboard!';
-  setTimeout(() => document.getElementById('statusHint').textContent = checklist.name || 'New checklist', 2000);
-}
-
-function importJSON() {
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = '.json';
-  input.onchange = async () => {
-    const file = input.files?.[0];
-    if (!file) return;
-    try {
-      const data = JSON.parse(await file.text());
-      checklist = {
-        id: data.id || '',
-        name: data.name || '',
-        author: data.author || '',
-        version: data.version || '1.0',
-        category: data.category || 'GA',
-        phases: (data.phases || []).map(p => ({
-          id: p.id || '',
-          name: p.name || '',
-          items: (p.items || []).map(it => ({
-            id: it.id || '',
-            label: it.label || '',
-            expected: it.expected || 'CHECK',
-            how_to: it.how_to || '',
-            location: it.location || '',
-            auto_detect: it.auto_detect ? {
-              condition: it.auto_detect.condition || '> 0',
-              xplane_dataref: it.auto_detect.xplane_dataref || it.auto_detect.var_name || '',
-              msfs_simvar: it.auto_detect.msfs_simvar || it.auto_detect.var_name || '',
-            } : null,
-          }))
-        }))
-      };
-      document.getElementById('metaName').value = checklist.name;
-      document.getElementById('metaAuthor').value = checklist.author;
-      document.getElementById('metaId').value = checklist.id;
-      document.getElementById('metaCategory').value = checklist.category;
-      document.getElementById('metaVersion').value = checklist.version;
-      activePhase = checklist.phases.length > 0 ? 0 : -1;
-      document.getElementById('statusHint').textContent = `Imported: ${checklist.name}`;
-      render();
-    } catch (e) {
-      alert('Invalid JSON: ' + e.message);
-    }
-  };
-  input.click();
-}
-
-function newChecklist() {
-  if (checklist.phases.length > 0 && !confirm('Start new? Current checklist will be lost.')) return;
-  checklist = { id: '', name: '', author: '', version: '1.0', category: 'GA', phases: [] };
-  document.getElementById('metaName').value = '';
-  document.getElementById('metaAuthor').value = '';
-  document.getElementById('metaId').value = '';
-  document.getElementById('metaCategory').value = 'GA';
-  document.getElementById('metaVersion').value = '1.0';
-  activePhase = -1;
-  document.getElementById('statusHint').textContent = 'New checklist';
-  render();
-}
-
-// Drag & drop items
-let dragIdx = -1;
-
-function onDragStart(e, idx) {
-  dragIdx = idx;
-  e.dataTransfer.effectAllowed = 'move';
-  e.currentTarget.classList.add('dragging');
-}
-
-function onDragOver(e, idx) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  if (idx !== dragIdx) {
-    e.currentTarget.classList.add('drag-over');
-  }
-}
-
-function onDragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
-}
-
-function onDrop(e, idx) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if (dragIdx < 0 || dragIdx === idx) return;
-  const phase = checklist.phases[activePhase];
-  const [item] = phase.items.splice(dragIdx, 1);
-  phase.items.splice(idx, 0, item);
-  dragIdx = -1;
-  render();
-}
-
-function onDragEnd(e) {
-  e.currentTarget.classList.remove('dragging');
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  dragIdx = -1;
-}
-
-// Drag & drop phases
-function onPhaseDragStart(e, idx) {
-  dragIdx = idx;
-  e.dataTransfer.effectAllowed = 'move';
-  e.currentTarget.classList.add('dragging');
-}
-
-function onPhaseDragOver(e, idx) {
-  e.preventDefault();
-  if (idx !== dragIdx) e.currentTarget.style.borderTop = '2px solid var(--accent)';
-}
-
-function onPhaseDragLeave(e) {
-  e.currentTarget.style.borderTop = '';
-}
-
-function onPhaseDrop(e, idx) {
-  e.preventDefault();
-  e.currentTarget.style.borderTop = '';
-  if (dragIdx < 0 || dragIdx === idx) return;
-  const [phase] = checklist.phases.splice(dragIdx, 1);
-  checklist.phases.splice(idx, 0, phase);
-  if (activePhase === dragIdx) activePhase = idx;
-  else if (dragIdx < activePhase && idx >= activePhase) activePhase--;
-  else if (dragIdx > activePhase && idx <= activePhase) activePhase++;
-  dragIdx = -1;
-  render();
-}
-
-function onPhaseDragEnd(e) {
-  e.currentTarget.classList.remove('dragging');
-  dragIdx = -1;
-}
-
-function toggleJSON() {
-  document.getElementById('jsonPanel').classList.toggle('open');
-  renderJSON();
-}
-
-// Init
+function exportJSON(){json();const b=new Blob([document.getElementById('jp').textContent],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(C.id||'checklist')+'.json';a.click()}
+function copyJSON(){json();navigator.clipboard.writeText(document.getElementById('jp').textContent);document.getElementById('st').textContent='Copied!';setTimeout(()=>document.getElementById('st').textContent=C.name||'New checklist',2000)}
+function importJSON(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{const f=i.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());C={id:d.id||'',name:d.name||'',author:d.author||'',version:d.version||'1.0',category:d.category||'GA',simulator:d.simulator||'both',phases:(d.phases||[]).map(p=>({id:p.id||'',name:p.name||'',items:(p.items||[]).map(it=>({id:it.id||'',label:it.label||'',expected:it.expected||'CHECK',how_to:it.how_to||'',location:it.location||'',auto_detect:it.auto_detect?{condition:it.auto_detect.condition||'> 0',xplane_dataref:it.auto_detect.xplane_dataref||it.auto_detect.var_name||'',msfs_simvar:it.auto_detect.msfs_simvar||it.auto_detect.var_name||''}:null}))}))};document.getElementById('mName').value=C.name;document.getElementById('mAuthor').value=C.author;document.getElementById('mId').value=C.id;document.getElementById('mCat').value=C.category;document.getElementById('mSim').value=C.simulator;document.getElementById('mVer').value=C.version;document.getElementById('st').textContent='Imported: '+C.name;render()}catch(e){alert('Invalid: '+e.message)}};i.click()}
+function fresh(){if(C.phases.length>0&&!confirm('Start new?'))return;C={id:'',name:'',author:'',version:'1.0',category:'GA',simulator:'both',phases:[]};['mName','mAuthor','mId'].forEach(id=>document.getElementById(id).value='');document.getElementById('mCat').value='GA';document.getElementById('mSim').value='both';document.getElementById('mVer').value='1.0';document.getElementById('st').textContent='New checklist';render()}
 render();
 </script>
 </body>
