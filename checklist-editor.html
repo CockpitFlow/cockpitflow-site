@@ -62,19 +62,8 @@
 </style>
 </head>
 <body>
+<nav></nav>
 
-<nav>
-  <a href="index.html" class="nav-brand"><span class="nav-name">COCKPITFLOW</span></a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="checklist.html">Checklist</a>
-    <a href="cockpit.html">Cockpit</a>
-    <a href="hardware.html">Hardware</a>
-    <a href="editor.html" class="active">Editor</a>
-    <a href="download.html">Download</a>
-  </div>
-  <a href="https://github.com/CockpitFlow/cockpitflow/releases" class="nav-cta">Download</a>
-</nav>
 
 <div class="ed-page">
   <div class="container">
@@ -105,57 +94,8 @@
   </div>
 </div>
 
-<footer><p>CockpitFlow — <a href="https://github.com/CockpitFlow/cockpitflow">GitHub</a></p></footer>
 
-<script>
-let C={id:'',name:'',author:'',version:'1.0',category:'GA',simulator:'both',phases:[]};
-function esc(s){return(s||'').replace(/"/g,'&quot;')}
-function render(){
-  let h='';
-  C.phases.forEach((p,pi)=>{
-    h+=`<div class="ed-phase"><div class="ed-phase-header">
-      <input class="ed-phase-name" value="${esc(p.name)}" oninput="C.phases[${pi}].name=this.value;json()">
-      <span class="ed-phase-count">${p.items.length}</span>
-      <button class="ed-phase-del" onclick="if(confirm('Delete?')){C.phases.splice(${pi},1);render()}">&#10005;</button>
-    </div><div class="ed-phase-body">`;
-    p.items.forEach((it,ii)=>{
-      h+=`<div class="ed-item">
-        <div class="ed-item-row">
-          <input class="ed-inp label" value="${esc(it.label)}" oninput="C.phases[${pi}].items[${ii}].label=this.value;json()">
-          <input class="ed-inp expected" value="${esc(it.expected)}" oninput="C.phases[${pi}].items[${ii}].expected=this.value;json()">
-          <button class="ed-del" onclick="C.phases[${pi}].items.splice(${ii},1);render()">&#10005;</button>
-        </div>
-        <div class="ed-item-row"><span class="ed-fld">HOW TO</span><input class="ed-inp full" value="${esc(it.how_to)}" oninput="C.phases[${pi}].items[${ii}].how_to=this.value;json()"></div>
-        <div class="ed-item-row"><span class="ed-fld">LOCATION</span><input class="ed-inp full" value="${esc(it.location)}" oninput="C.phases[${pi}].items[${ii}].location=this.value;json()"></div>
-        <div class="ed-ad">
-          <div class="ed-ad-row"><span class="ed-ad-lbl co">CONDITION</span><input class="ed-ad-inp co" value="${esc(it.auto_detect?.condition)}" oninput="ad(${pi},${ii},'condition',this.value)"></div>
-          <div class="ed-ad-row"><span class="ed-ad-lbl xp">X-PLANE</span><input class="ed-ad-inp" value="${esc(it.auto_detect?.xplane_dataref)}" oninput="ad(${pi},${ii},'xplane_dataref',this.value)" placeholder="sim/cockpit/..."></div>
-          <div class="ed-ad-row"><span class="ed-ad-lbl ms">MSFS</span><input class="ed-ad-inp" value="${esc(it.auto_detect?.msfs_simvar)}" oninput="ad(${pi},${ii},'msfs_simvar',this.value)" placeholder="ELECTRICAL MASTER..."></div>
-        </div>
-      </div>`;
-    });
-    h+=`<button class="ed-add" onclick="C.phases[${pi}].items.push({id:'i'+Date.now(),label:'',expected:'CHECK',how_to:'',location:'',auto_detect:null});render()">+ Add Item</button></div></div>`;
-  });
-  h+=`<button class="ed-add ed-add-phase" onclick="C.phases.push({id:'',name:'New Phase',items:[]});render()">+ Add Phase</button>`;
-  document.getElementById('main').innerHTML=h;
-  json();
-  const items=C.phases.reduce((s,p)=>s+p.items.length,0);
-  document.getElementById('stats').innerHTML=`<strong>${C.phases.length}</strong> phases, <strong>${items}</strong> items`;
-}
-function ad(pi,ii,f,v){const it=C.phases[pi].items[ii];if(!it.auto_detect)it.auto_detect={condition:'> 0',xplane_dataref:'',msfs_simvar:''};it.auto_detect[f]=v;json()}
-function meta(){C.name=document.getElementById('mName').value;C.author=document.getElementById('mAuthor').value;C.id=document.getElementById('mId').value;C.category=document.getElementById('mCat').value;C.simulator=document.getElementById('mSim').value;C.version=document.getElementById('mVer').value;document.getElementById('st').textContent=C.name||'New checklist';json()}
-function json(){
-  const o={id:C.id||C.name.toLowerCase().replace(/[^a-z0-9]/g,'-'),name:C.name,author:C.author,version:C.version,category:C.category,simulator:C.simulator,
-    phases:C.phases.map(p=>({id:p.id||p.name.toLowerCase().replace(/[^a-z0-9]/g,'-'),name:p.name,
-      items:p.items.map(it=>{const r={id:it.id,label:it.label,expected:it.expected};if(it.how_to)r.how_to=it.how_to;if(it.location)r.location=it.location;
-        if(it.auto_detect?.xplane_dataref||it.auto_detect?.msfs_simvar)r.auto_detect={condition:it.auto_detect.condition||'> 0',xplane_dataref:it.auto_detect.xplane_dataref||null,msfs_simvar:it.auto_detect.msfs_simvar||null};else r.auto_detect=null;return r})}))};
-  document.getElementById('jp').textContent=JSON.stringify(o,null,2);
-}
-function exportJSON(){json();const b=new Blob([document.getElementById('jp').textContent],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(C.id||'checklist')+'.json';a.click()}
-function copyJSON(){json();navigator.clipboard.writeText(document.getElementById('jp').textContent);document.getElementById('st').textContent='Copied!';setTimeout(()=>document.getElementById('st').textContent=C.name||'New checklist',2000)}
-function importJSON(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{const f=i.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());C={id:d.id||'',name:d.name||'',author:d.author||'',version:d.version||'1.0',category:d.category||'GA',simulator:d.simulator||'both',phases:(d.phases||[]).map(p=>({id:p.id||'',name:p.name||'',items:(p.items||[]).map(it=>({id:it.id||'',label:it.label||'',expected:it.expected||'CHECK',how_to:it.how_to||'',location:it.location||'',auto_detect:it.auto_detect?{condition:it.auto_detect.condition||'> 0',xplane_dataref:it.auto_detect.xplane_dataref||it.auto_detect.var_name||'',msfs_simvar:it.auto_detect.msfs_simvar||it.auto_detect.var_name||''}:null}))}))};document.getElementById('mName').value=C.name;document.getElementById('mAuthor').value=C.author;document.getElementById('mId').value=C.id;document.getElementById('mCat').value=C.category;document.getElementById('mSim').value=C.simulator;document.getElementById('mVer').value=C.version;document.getElementById('st').textContent='Imported: '+C.name;render()}catch(e){alert('Invalid: '+e.message)}};i.click()}
-function fresh(){if(C.phases.length>0&&!confirm('Start new?'))return;C={id:'',name:'',author:'',version:'1.0',category:'GA',simulator:'both',phases:[]};['mName','mAuthor','mId'].forEach(id=>document.getElementById(id).value='');document.getElementById('mCat').value='GA';document.getElementById('mSim').value='both';document.getElementById('mVer').value='1.0';document.getElementById('st').textContent='New checklist';render()}
-render();
-</script>
+<footer></footer>
+<script src="components.js" defer></script>
 </body>
 </html>
