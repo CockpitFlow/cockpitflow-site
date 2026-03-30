@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 :root {
   --bg: #0a0e14;
@@ -108,7 +108,7 @@ section { padding: 80px 20px; }
   padding: 20px; overflow-x: auto; margin: 20px 0;
 }
 .code-block pre {
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  font-family: 'Share Tech Mono', monospace; font-size: 12px;
   color: var(--dim); line-height: 1.6;
 }
 .code-block .key { color: var(--accent); }

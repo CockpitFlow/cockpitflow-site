@@ -21,7 +21,7 @@
 .demo-bar::-webkit-scrollbar { height: 0; }
 .demo-tab {
   padding: 8px 14px; background: none; border: none;
-  color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--dim); font-family: 'Share Tech Mono', monospace; font-size: 10px;
   font-weight: 600; cursor: pointer; white-space: nowrap;
   border-bottom: 2px solid transparent; flex-shrink: 0;
 }
@@ -29,10 +29,11 @@
 .demo-tab.done { color: var(--green); }
 .demo-items { padding: 10px; max-height: 480px; overflow-y: auto; }
 .demo-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px; margin-bottom: 4px;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px; margin-bottom: 4px;
   background: #0f1319; border: 1px solid var(--border);
-  border-radius: 6px; cursor: pointer; transition: all .15s;
+  border-radius: 8px; cursor: pointer; transition: all .15s;
+  min-height: 54px;
 }
 .demo-item:hover { border-color: rgba(74,158,255,.15); }
 .demo-item.checked { opacity: .5; }
@@ -41,18 +42,25 @@
 .demo-item.current { border-color: var(--accent); background: rgba(74,158,255,.03); }
 .demo-item.locked { opacity: .3; pointer-events: none; }
 .demo-chk {
-  width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
   border: 2px solid var(--border); transition: all .15s;
-  position: relative;
+  position: relative; margin-top: 1px;
 }
 .demo-item.checked .demo-chk::after {
-  content: ''; position: absolute; left: 5px; top: 1px;
-  width: 5px; height: 10px; border: solid #fff;
-  border-width: 0 2px 2px 0; transform: rotate(45deg);
+  content: ''; position: absolute; left: 6px; top: 2px;
+  width: 6px; height: 12px; border: solid #fff;
+  border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
 }
-.demo-label { font-size: 13px; font-weight: 500; flex: 1; }
+.demo-body { flex: 1; min-width: 0; }
+.demo-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.demo-label { font-size: 14px; font-weight: 600; }
+.demo-how {
+  font-size: 12px; color: var(--dim); margin-top: 6px; line-height: 1.4;
+  display: none; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.03);
+}
+.demo-item.expanded .demo-how { display: block; }
 .demo-exp {
-  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  font-family: 'Share Tech Mono', monospace; font-size: 11px;
   color: var(--accent); padding: 1px 6px; background: rgba(74,158,255,.06);
   border-radius: 3px;
 }
@@ -63,7 +71,7 @@
 .demo-footer {
   display: flex; justify-content: space-between; align-items: center;
   padding: 8px 12px; border-top: 1px solid var(--border);
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim);
+  font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--dim);
 }
 .demo-footer strong { color: var(--green); }
 .demo-hint {
@@ -113,10 +121,10 @@
 
     <div class="demo-wrap" id="demo">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);background:#0f1319">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim)">Cessna 172S Skyhawk</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim)">Cessna 172S Skyhawk</span>
         <div style="display:flex;gap:2px">
-          <button id="modeStrict" onclick="setMode('strict')" style="padding:3px 10px;background:#0a0e14;border:1px solid var(--border);border-radius:3px 0 0 3px;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">STRICT</button>
-          <button id="modeSmart" onclick="setMode('smart')" style="padding:3px 10px;background:rgba(74,158,255,.08);border:1px solid var(--accent);border-radius:0 3px 3px 0;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">SMART</button>
+          <button id="modeStrict" onclick="setMode('strict')" style="padding:3px 10px;background:#0a0e14;border:1px solid var(--border);border-radius:3px 0 0 3px;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">STRICT</button>
+          <button id="modeSmart" onclick="setMode('smart')" style="padding:3px 10px;background:rgba(74,158,255,.08);border:1px solid var(--accent);border-radius:0 3px 3px 0;color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:600;cursor:pointer">SMART</button>
         </div>
       </div>
       <div class="demo-bar" id="demoTabs"></div>
@@ -296,14 +304,14 @@
 const demoData = {
   phases: [
     { name: 'Pre-Flight', items: [
-      { label: 'Documents (ARROW)', expected: 'CHECK', dot: 'na' },
-      { label: 'Fuel Quantity', expected: 'CHECK', dot: 'ok' },
-      { label: 'Fuel Selector', expected: 'BOTH', dot: 'ok' },
-      { label: 'Master Switch', expected: 'ON', dot: 'fail' },
-      { label: 'Fuel Gauges', expected: 'CHECK', dot: 'na' },
-      { label: 'Flaps', expected: 'UP', dot: 'ok' },
-      { label: 'Avionics Master', expected: 'OFF', dot: 'ok' },
-      { label: 'Master Switch', expected: 'OFF', dot: 'ok' },
+      { label: 'Documents (ARROW)', expected: 'CHECK', dot: 'na', how: 'Verify Airworthiness cert, Registration, Operating handbook, Weight & balance, Radio license.' },
+      { label: 'Fuel Quantity', expected: 'CHECK', dot: 'ok', how: 'Visually check fuel level through filler caps on each wing.' },
+      { label: 'Fuel Selector', expected: 'BOTH', dot: 'ok', how: 'Turn the fuel selector valve handle to the BOTH position.' },
+      { label: 'Master Switch', expected: 'ON', dot: 'fail', how: 'Push both halves of the red master switch (BAT and ALT) to ON.' },
+      { label: 'Fuel Gauges', expected: 'CHECK', dot: 'na', how: 'Compare gauge readings against visual inspection.' },
+      { label: 'Flaps', expected: 'UP', dot: 'ok', how: 'Move flap lever fully up. Verify flaps retracted visually.' },
+      { label: 'Avionics Master', expected: 'OFF', dot: 'ok', how: 'Ensure avionics master switch is OFF before engine start.' },
+      { label: 'Master Switch', expected: 'OFF', dot: 'ok', how: 'Return master switch to OFF after pre-flight checks.' },
     ]},
     { name: 'Engine Start', items: [
       { label: 'Mixture', expected: 'RICH', dot: 'ok' },
@@ -342,8 +350,9 @@ function renderDemo() {
   const phase = demoData.phases[demoPhase];
 
   tabs.innerHTML = demoData.phases.map((p, i) => {
-    const allDone = p.items.every((_, j) => demoChecked[`${i}-${j}`]);
-    return `<button class="demo-tab${i === demoPhase ? ' on' : ''}${allDone ? ' done' : ''}" onclick="demoPhase=${i};renderDemo()">${p.name}</button>`;
+    const done = p.items.filter((_, j) => demoChecked[`${i}-${j}`]).length;
+    const allDone = done === p.items.length;
+    return `<button class="demo-tab${i === demoPhase ? ' on' : ''}${allDone ? ' done' : ''}" onclick="demoPhase=${i};renderDemo()">${p.name} <span style="font-size:9px;opacity:.5">${done}/${p.items.length}</span></button>`;
   }).join('');
 
   const firstUnchecked = phase.items.findIndex((_, i) => !demoChecked[`${demoPhase}-${i}`]);
@@ -353,10 +362,15 @@ function renderDemo() {
     const checked = demoChecked[key];
     const isCurrent = demoMode === 'strict' && i === firstUnchecked;
     const isLocked = demoMode === 'strict' && i > firstUnchecked && firstUnchecked >= 0 && !checked;
-    return `<div class="demo-item${checked ? ' checked' : ''}${isCurrent ? ' current' : ''}${isLocked ? ' locked' : ''}" onclick="${isLocked ? '' : `demoChecked['${key}']=!demoChecked['${key}'];renderDemo()`}">
-      <div class="demo-chk"></div>
-      <span class="demo-label">${item.label}</span>
-      <span class="demo-exp">${item.expected}</span>
+    return `<div class="demo-item${checked ? ' checked' : ''}${isCurrent ? ' current' : ''}${isLocked ? ' locked' : ''}" onclick="${isLocked ? '' : `this.classList.toggle('expanded')`}">
+      <div class="demo-chk" onclick="event.stopPropagation();${isLocked ? '' : `demoChecked['${key}']=!demoChecked['${key}'];renderDemo()`}"></div>
+      <div class="demo-body">
+        <div class="demo-top">
+          <span class="demo-label">${item.label}</span>
+          <span class="demo-exp">${item.expected}</span>
+        </div>
+        ${item.how ? `<div class="demo-how">${item.how}</div>` : ''}
+      </div>
       <span class="demo-dot ${item.dot}"></span>
     </div>`;
   }).join('');
