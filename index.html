@@ -6,58 +6,6 @@
 <title>CockpitFlow — Flight Simulator Cockpit Companion</title>
 <meta name="description" content="Open-source cockpit companion for flight simulators. Custom cockpit layouts, checklists, hardware integration. X-Plane & MSFS.">
 <link rel="stylesheet" href="style.css">
-<style>
-.hero {
-  min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center;
-  padding: 120px 20px 80px; position: relative;
-}
-.hero::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 30%, rgba(74,158,255,.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero h1 {
-  font-family: 'Orbitron'; font-size: 48px; font-weight: 700;
-  color: #fff; letter-spacing: 8px; margin-bottom: 12px; position: relative;
-}
-.hero p { font-size: 18px; color: var(--dim); max-width: 520px; margin-bottom: 32px; position: relative; }
-.hero-btns { display: flex; gap: 12px; position: relative; }
-
-.steps { display: flex; gap: 24px; margin-top: 40px; }
-.step {
-  flex: 1; padding: 24px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 10px; text-align: center;
-}
-.step-num { font-family: 'Orbitron'; font-size: 32px; font-weight: 700; color: rgba(74,158,255,.2); margin-bottom: 12px; }
-.step h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; }
-.step p { font-size: 12px; color: var(--dim); }
-
-.tools { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
-.tool {
-  padding: 24px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; display: flex; flex-direction: column; gap: 8px;
-}
-.tool h3 { font-size: 15px; color: #fff; }
-.tool p { font-size: 13px; color: var(--dim); flex: 1; }
-.tool a { color: var(--accent); font-size: 12px; font-weight: 600; text-decoration: none; }
-.tool a:hover { text-decoration: underline; }
-
-.comm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
-.comm-card {
-  padding: 20px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; text-align: center;
-}
-.comm-card h3 { font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
-.comm-card p { font-size: 12px; color: var(--dim); }
-
-@media (max-width: 768px) {
-  .hero h1 { font-size: 28px; letter-spacing: 3px; }
-  .steps { flex-direction: column; }
-  .tools { grid-template-columns: 1fr; }
-  .comm-grid { grid-template-columns: 1fr; }
-}
-</style>
 </head>
 <body>
 <nav></nav>
