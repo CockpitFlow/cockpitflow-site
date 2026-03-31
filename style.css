@@ -144,6 +144,15 @@ section.alt { background: var(--cf-surface); }
 .tut-content h3 { font-size: 15px; color: #fff; margin-bottom: 4px; }
 .tut-content p { font-size: 13px; color: var(--cf-dim); }
 
+/* ═══════════════════ FOOTER ═══════════════════ */
+footer {
+  text-align: center; padding: 30px 40px;
+  border-top: 1px solid var(--cf-border);
+  font-size: 12px; color: var(--cf-dim);
+}
+footer a { color: var(--cf-accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
 /* ═══════════════════ RESPONSIVE ═══════════════════ */
 @media (max-width: 768px) {
   nav { padding: 10px 16px; }
