@@ -7,6 +7,97 @@
 <meta name="description" content="Smart aircraft checklists with auto-detect from sim data. Cessna 172, Boeing 747, Airbus A320 and more. Open source.">
 
 <link rel="stylesheet" href="style.css">
+<style>
+/* Demo checklist */
+.demo-wrap {
+  max-width: 680px; margin: 0 auto;
+  background: #0a0e14; border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.demo-bar {
+  display: flex; overflow-x: auto; background: #0f1319;
+  border-bottom: 1px solid var(--border); padding: 0 4px;
+}
+.demo-bar::-webkit-scrollbar { height: 0; }
+.demo-tab {
+  padding: 8px 14px; background: none; border: none;
+  color: var(--dim); font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; flex-shrink: 0;
+}
+.demo-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.demo-tab.done { color: var(--green); }
+.demo-items { padding: 10px; max-height: 480px; overflow-y: auto; }
+.demo-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px; margin-bottom: 4px;
+  background: #0f1319; border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; transition: all .15s;
+  min-height: 54px;
+}
+.demo-item:hover { border-color: rgba(74,158,255,.15); }
+.demo-item.checked { opacity: .5; }
+.demo-item.checked .demo-chk { background: var(--green); border-color: var(--green); }
+.demo-item.checked .demo-label { text-decoration: line-through; }
+.demo-item.current { border-color: var(--accent); background: rgba(74,158,255,.03); }
+.demo-item.locked { opacity: .3; pointer-events: none; }
+.demo-chk {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  border: 2px solid var(--border); transition: all .15s;
+  position: relative; margin-top: 1px;
+}
+.demo-item.checked .demo-chk::after {
+  content: ''; position: absolute; left: 6px; top: 2px;
+  width: 6px; height: 12px; border: solid #fff;
+  border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+}
+.demo-body { flex: 1; min-width: 0; }
+.demo-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.demo-label { font-size: 14px; font-weight: 600; }
+.demo-how {
+  font-size: 12px; color: var(--dim); margin-top: 6px; line-height: 1.4;
+  display: none; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.03);
+}
+.demo-item.expanded .demo-how { display: block; }
+.demo-exp {
+  font-family: 'Share Tech Mono', monospace; font-size: 11px;
+  color: var(--accent); padding: 1px 6px; background: rgba(74,158,255,.06);
+  border-radius: 3px;
+}
+.demo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.demo-dot.ok { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.demo-dot.fail { background: var(--red); box-shadow: 0 0 4px var(--red); }
+.demo-dot.na { background: var(--dim); }
+.demo-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-top: 1px solid var(--border);
+  font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--dim);
+}
+.demo-footer strong { color: var(--green); }
+.demo-hint {
+  text-align: center; padding: 8px; font-size: 10px; color: var(--dim);
+  border-top: 1px solid rgba(255,255,255,.02);
+}
+.cmp-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.cmp-table th, .cmp-table td {
+  padding: 10px 14px; text-align: left; font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.cmp-table th { color: var(--dim); font-size: 11px; font-weight: 600; letter-spacing: .5px; }
+.cmp-table td:first-child { color: #fff; font-weight: 500; }
+.cmp-yes { color: var(--green); }
+.cmp-no { color: var(--dim); }
+.cmp-table tr:hover td { background: rgba(74,158,255,.02); }
+.tut-steps { display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
+.tut-step { display: flex; gap: 20px; align-items: flex-start; }
+.tut-num {
+  font-family: 'Orbitron'; font-size: 28px; font-weight: 700;
+  color: rgba(74,158,255,.15); flex-shrink: 0; width: 40px;
+}
+.tut-content { flex: 1; }
+.tut-content h3 { font-size: 15px; color: #fff; margin-bottom: 4px; }
+.tut-content p { font-size: 13px; color: var(--dim); }
+</style>
 </head>
 <body>
 <nav></nav>
